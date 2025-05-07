@@ -21,6 +21,9 @@ class CarritoController extends GetxController {
   final RxString error = ''.obs;
   final RxList<ClienteModel> clientes = <ClienteModel>[].obs;
   final RxString notasCotizacion = ''.obs;
+
+  final RxDouble costoEnvioNormal = 0.0.obs;
+  final RxDouble costoEnvioExpress = 0.0.obs;
   
   // Getters para acceder a las variables del servicio
   RxList<ItemVentaModel> get items => _carritoService.items;

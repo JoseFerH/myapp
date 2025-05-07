@@ -53,9 +53,8 @@ class ListaItemsComponent extends GetView<CarritoController> {
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             itemCount: controller.items.length,
-            separatorBuilder: (context, index) => const Divider(
+            separatorBuilder: (context, index) => Container(
               height: 1,
-              thickness: 1,
               color: CupertinoColors.systemGrey5,
             ),
             itemBuilder: (context, index) {

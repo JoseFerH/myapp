@@ -20,7 +20,7 @@ class TablaDatosComponent extends GetView<VisualizacionController> {
     return Obx(() => ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: controller.ventas.length,
-      separatorBuilder: (context, index) => const Divider(height: 1),
+      separatorBuilder: (context, index) => Container(height: 1),
       itemBuilder: (context, index) {
         final venta = controller.ventas[index];
         return _buildVentaItem(venta);

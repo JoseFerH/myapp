@@ -9,6 +9,7 @@ import '../models/material_model.dart';
 import '../providers/ventas_provider.dart';
 import '../providers/clientes_provider.dart';
 import '../providers/materiales_provider.dart';
+import '../models/item_venta_model.dart';
 
 class ExportacionService extends GetxService {
   final VentasProvider _ventasProvider = VentasProvider();

@@ -220,9 +220,10 @@ class DetalleComponent extends GetView<VisualizacionController> {
                             Text(formatoMoneda.format(venta.costoEnvio)),
                           ],
                         ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Divider(),
+                        Container(
+                          height: 1,
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          color: CupertinoColors.systemGrey5,
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -8,6 +8,7 @@ import '../../../data/models/hoja_model.dart';
 import '../../../data/models/laminado_model.dart';
 import '../../../widgets/empty_state.dart';
 import '../components/form_material_component.dart';
+import 'package:intl/intl.dart';
 
 class InventarioView extends GetView<RegistrosController> {
   const InventarioView({Key? key}) : super(key: key);

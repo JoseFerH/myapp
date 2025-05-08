@@ -126,5 +126,5 @@ class AppPages {
     //   name: AppRoutes.DETALLE_CLIENTE,
     //   page: () => const DetalleClienteView(),
     // ),
-  ],
-};
+  ];
+}

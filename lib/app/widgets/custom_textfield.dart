@@ -603,7 +603,7 @@ class IntTextField extends StatelessWidget {
         }
         
         // Ejecutar validador externo si existe
-        return widget.validator?.call(value);
+        return validator?.call(value);
       },
       keyboardType: TextInputType.number,
       inputFormatters: [

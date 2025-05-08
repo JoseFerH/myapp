@@ -8,7 +8,8 @@ import '../../../widgets/empty_state.dart';
 class ListaRegistrosComponent extends GetView<RegistrosController> {
   final String tipo; // 'clientes', 'proveedores', 'materiales'
   final Function(BuildContext) onAgregar;
-  final Widget Function(int) itemBuilder;
+  // Change this line to include BuildContext in the function signature
+  final Widget Function(BuildContext, int) itemBuilder;
   final String emptyTitle;
   final String emptyMessage;
   final IconData emptyIcon;
@@ -56,8 +57,9 @@ class ListaRegistrosComponent extends GetView<RegistrosController> {
           return ListView.separated(
             padding: const EdgeInsets.only(bottom: 80), // Espacio para el botón flotante
             itemCount: itemCount,
+            // Correct this line to pass the context parameter to itemBuilder
+            itemBuilder: (context, index) => itemBuilder(context, index),
             separatorBuilder: (context, index) => Container(height: 1),
-            itemBuilder: itemBuilder,
           );
         }),
         

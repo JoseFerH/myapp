@@ -2,6 +2,7 @@
 
 import 'package:flutter/cupertino.dart';
 import '../utils/themes.dart';
+import '../data/models/venta_model.dart';
 
 /// Widget para mostrar estados con insignias coloreadas
 

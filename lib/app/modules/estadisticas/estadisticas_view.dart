@@ -35,43 +35,49 @@ class EstadisticasView extends GetView<EstadisticasController> {
               // Selector de período
               _buildPeriodoSelector(),
               
-              // Contenido principal (scrollable)
+              // Contenido principal (scrollable con refresh control de Cupertino)
               Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () => controller.actualizarDashboard(),
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        // Resumen de ventas del período seleccionado
-                        ResumenVentasComponent(),
-                        
-                        SizedBox(height: 24),
-                        
-                        // Gráficos de ventas
-                        GraficosVentasComponent(),
-                        
-                        SizedBox(height: 24),
-                        
-                        // Top clientes
-                        TopClientesComponent(),
-                        
-                        SizedBox(height: 24),
-                        
-                        // Productos populares
-                        ProductosPopularesComponent(),
-                        
-                        SizedBox(height: 24),
-                        
-                        // Alertas de inventario
-                        AlertasInventarioComponent(),
-                        
-                        SizedBox(height: 16),
-                      ],
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    // Control de refresh estilo iOS
+                    CupertinoSliverRefreshControl(
+                      onRefresh: () => controller.actualizarDashboard(),
                     ),
-                  ),
+                    
+                    // Contenido principal
+                    SliverPadding(
+                      padding: const EdgeInsets.all(16.0),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          // Resumen de ventas del período seleccionado
+                          const ResumenVentasComponent(),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Gráficos de ventas
+                          const GraficosVentasComponent(),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Top clientes
+                          const TopClientesComponent(),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Productos populares
+                          const ProductosPopularesComponent(),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Alertas de inventario
+                          const AlertasInventarioComponent(),
+                          
+                          const SizedBox(height: 16),
+                        ]),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -1,5 +1,3 @@
-// lib/app/controllers/configuracion_controller.dart
-
 import 'package:get/get.dart';
 import '../data/models/configuracion_model.dart';
 import '../data/models/costo_fijo_model.dart';
@@ -12,6 +10,7 @@ class ConfiguracionController extends GetxController {
   // Variables reactivas de UI
   final RxBool cargando = false.obs;
   final RxString error = ''.obs;
+  final RxInt tabIndex = 0.obs; // Tab index for the segmented control
   
   // Variables reactivas para configuración
   final Rx<ConfiguracionModel?> configuracion = Rx<ConfiguracionModel?>(null);
@@ -37,6 +36,11 @@ class ConfiguracionController extends GetxController {
     super.onInit();
     await cargarConfiguracion();
     await cargarCostosFijos();
+  }
+  
+  // Method to change the selected tab
+  void cambiarTab(int index) {
+    tabIndex.value = index;
   }
   
   // Cargar configuración global

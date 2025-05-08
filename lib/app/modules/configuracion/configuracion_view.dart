@@ -1,3 +1,5 @@
+// lib/app/modules/configuracion/configuracion_view.dart
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../controllers/configuracion_controller.dart';

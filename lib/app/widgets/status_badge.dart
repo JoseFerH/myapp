@@ -114,3 +114,106 @@ class StatusBadge extends StatelessWidget {
       case EstadoVenta.cancelada:
         text = 'Cancelada';
         color = CupertinoColors.systemRed;
+        icon = CupertinoIcons.xmark_circle;
+        break;
+    }
+    
+    return StatusBadge(
+      text: text,
+      color: color,
+      icon: icon,
+      small: small,
+      style: small ? BadgeStyle.light : BadgeStyle.filled,
+    );
+  }
+  
+  // Badge de nivel de stock
+  static Widget nivelStock(int cantidad, int minimo, {bool small = false}) {
+    // Calcular nivel basado en cantidad mínima
+    final double ratio = cantidad / minimo;
+    
+    String text;
+    Color color;
+    IconData? icon;
+    
+    if (cantidad <= 0) {
+      text = 'Agotado';
+      color = CupertinoColors.systemRed;
+      icon = CupertinoIcons.exclamationmark_circle;
+    } else if (ratio <= 0.5) {
+      text = 'Crítico';
+      color = CupertinoColors.systemOrange;
+      icon = CupertinoIcons.exclamationmark_triangle;
+    } else if (ratio <= 1.0) {
+      text = 'Bajo';
+      color = CupertinoColors.systemYellow;
+      icon = CupertinoIcons.arrow_down;
+    } else {
+      text = 'Normal';
+      color = CupertinoColors.systemGreen;
+      icon = CupertinoIcons.checkmark_circle;
+    }
+    
+    return StatusBadge(
+      text: text,
+      color: color,
+      icon: icon,
+      small: small,
+      style: small ? BadgeStyle.light : BadgeStyle.filled,
+    );
+  }
+  
+  // Badge de tipo de cliente
+  static Widget tipoCliente(String tipo, {bool small = false}) {
+    Color color;
+    IconData? icon;
+    
+    switch (tipo.toLowerCase()) {
+      case 'vip':
+        color = CupertinoColors.systemYellow;
+        icon = CupertinoIcons.star_fill;
+        break;
+      case 'frecuente':
+        color = CupertinoColors.activeBlue;
+        icon = CupertinoIcons.person_2_fill;
+        break;
+      case 'regular':
+      default:
+        color = CupertinoColors.systemGrey;
+        icon = CupertinoIcons.person_fill;
+        break;
+    }
+    
+    return StatusBadge(
+      text: tipo,
+      color: color,
+      icon: icon,
+      small: small,
+      style: BadgeStyle.light,
+    );
+  }
+  
+  // Badge personalizado con estilo predefinido
+  static Widget custom({
+    required String text, 
+    required Color color,
+    IconData? icon,
+    bool small = false,
+    BadgeStyle style = BadgeStyle.filled,
+  }) {
+    return StatusBadge(
+      text: text,
+      color: color,
+      icon: icon,
+      small: small,
+      style: style,
+    );
+  }
+}
+
+// Enum para definir el estilo del badge
+enum BadgeStyle {
+  filled,    // Fondo de color sólido, texto blanco
+  light,     // Fondo de color con opacidad, texto del color principal
+  outlined,  // Fondo blanco, borde y texto del color principal
+}

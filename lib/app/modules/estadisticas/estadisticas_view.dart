@@ -1,3 +1,5 @@
+// lib/app/modules/estadisticas/estadisticas_view.dart
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../controllers/estadisticas_controller.dart';

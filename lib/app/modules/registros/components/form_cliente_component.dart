@@ -1,3 +1,5 @@
+// lib/app/modules/registros/components/form_cliente_component.dart
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../../controllers/registros_controller.dart';

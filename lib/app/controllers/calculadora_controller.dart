@@ -84,11 +84,13 @@ class CalculadoraController extends GetxController {
   // Método para cambiar la hoja seleccionada
   void seleccionarHoja(HojaModel hoja) {
     _calculadoraService.seleccionarHoja(hoja);
+    update(); // Forzar actualización de la UI
   }
 
   // Método para cambiar el laminado seleccionado
   void seleccionarLaminado(LaminadoModel laminado) {
     _calculadoraService.seleccionarLaminado(laminado);
+    update(); // Forzar actualización de la UI
   }
 
   // Método para cambiar el tamaño del sticker
@@ -114,6 +116,7 @@ class CalculadoraController extends GetxController {
   // Método para toggle desperdicio
   void toggleDesperdicio(bool valor) {
     _calculadoraService.toggleDesperdicio(valor);
+    update(); // Forzar actualización de la UI
   }
 
   // Método para resetear los valores

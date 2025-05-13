@@ -1,3 +1,5 @@
+// lib/app/modules/calculadora/components/preview_calculo_component.dart
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -15,80 +17,105 @@ class PreviewCalculoComponent extends GetView<CalculadoraController> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.zero,
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6,
-        borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: CupertinoColors.systemGrey5),
-        boxShadow: [
-          BoxShadow(
-            color: CupertinoColors.systemGrey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Resumen de Cálculo',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+    return GetBuilder<CalculadoraController>(
+      builder:
+          (controller) => Container(
+            margin: EdgeInsets.zero,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemGrey6,
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: CupertinoColors.systemGrey5),
+              boxShadow: [
+                BoxShadow(
+                  color: CupertinoColors.systemGrey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 3,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Resumen de Cálculo',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Desglose de costos
+                Obx(
+                  () => _buildResumenItem(
+                    'Materiales:',
+                    controller.costoMateriales.value,
+                  ),
+                ),
+                _buildDivider(),
+
+                Obx(
+                  () => _buildResumenItem(
+                    'Costos Fijos:',
+                    controller.costosFijos.value,
+                  ),
+                ),
+                _buildDivider(),
+
+                Obx(
+                  () =>
+                      _buildResumenItem('Subtotal:', controller.subtotal.value),
+                ),
+                _buildDivider(),
+
+                Obx(
+                  () => _buildResumenItem(
+                    'Ganancia (50%):',
+                    controller.ganancia.value,
+                  ),
+                ),
+                _buildDivider(),
+
+                // Precio unitario
+                Obx(
+                  () => _buildResumenItem(
+                    'Precio Unitario:',
+                    controller.precioUnitario.value,
+                    isBold: true,
+                  ),
+                ),
+
+                // Precio total si cantidad > 1
+                Obx(() {
+                  if (controller.cantidad.value > 1) {
+                    return Column(
+                      children: [
+                        _buildDivider(),
+                        _buildResumenItem(
+                          'Precio Total (${controller.cantidad.value} unidades):',
+                          controller.precioTotal.value,
+                          isBold: true,
+                          isTotal: true,
+                        ),
+                      ],
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                }),
+              ],
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Desglose de costos
-          Obx(() => _buildResumenItem('Materiales:', controller.costoMateriales.value)),
-          _buildDivider(),
-          
-          Obx(() => _buildResumenItem('Costos Fijos:', controller.costosFijos.value)),
-          _buildDivider(),
-          
-          Obx(() => _buildResumenItem('Subtotal:', controller.subtotal.value)),
-          _buildDivider(),
-          
-          Obx(() => _buildResumenItem('Ganancia (50%):', controller.ganancia.value)),
-          _buildDivider(),
-          
-          // Precio unitario
-          Obx(() => _buildResumenItem(
-            'Precio Unitario:', 
-            controller.precioUnitario.value,
-            isBold: true,
-          )),
-          
-          // Precio total si cantidad > 1
-          Obx(() {
-            if (controller.cantidad.value > 1) {
-              return Column(
-                children: [
-                  _buildDivider(),
-                  _buildResumenItem(
-                    'Precio Total (${controller.cantidad.value} unidades):', 
-                    controller.precioTotal.value,
-                    isBold: true,
-                    isTotal: true,
-                  ),
-                ],
-              );
-            } else {
-              return const SizedBox.shrink();
-            }
-          }),
-        ],
-      ),
     );
   }
-  
+
   // Widget para construir cada item del resumen
-  Widget _buildResumenItem(String label, double valor, {bool isBold = false, bool isTotal = false}) {
+  Widget _buildResumenItem(
+    String label,
+    double valor, {
+    bool isBold = false,
+    bool isTotal = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -113,7 +140,7 @@ class PreviewCalculoComponent extends GetView<CalculadoraController> {
       ),
     );
   }
-  
+
   // Reemplazo personalizado para Divider
   Widget _buildDivider() {
     return Container(

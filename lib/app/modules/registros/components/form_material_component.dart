@@ -1,5 +1,3 @@
-// lib/app/modules/registros/components/form_material_component.dart
-
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -8,67 +6,129 @@ import '../../../data/models/material_model.dart';
 import '../../../data/models/hoja_model.dart';
 import '../../../data/models/laminado_model.dart';
 
-class FormMaterialComponent extends GetView<RegistrosController> {
+class FormMaterialComponent extends StatefulWidget {
   final MaterialModel? material;
-  
+
   const FormMaterialComponent({Key? key, this.material}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    // Controladores para los campos comunes
-    final nombreController = TextEditingController(text: material?.nombre ?? '');
-    final descripcionController = TextEditingController(text: material?.descripcion ?? '');
-    final precioController = TextEditingController(
-      text: material?.precioUnitario.toString() ?? '0.0',
+  _FormMaterialComponentState createState() => _FormMaterialComponentState();
+}
+
+class _FormMaterialComponentState extends State<FormMaterialComponent> {
+  // Controladores para los campos comunes
+  late TextEditingController nombreController;
+  late TextEditingController descripcionController;
+  late TextEditingController precioController;
+  late TextEditingController cantidadController;
+  late TextEditingController cantidadMinimaController;
+  late TextEditingController fechaController;
+  late TextEditingController tamanoController;
+  late TextEditingController grosorController;
+
+  // Variables para tipo de material y campos específicos
+  late Rx<TipoMaterial> tipoMaterial;
+  late Rx<TipoHoja> tipoHoja;
+  late Rx<TipoLaminado> tipoLaminado;
+
+  // Fecha seleccionada
+  late DateTime fechaSeleccionada;
+
+  // Proveedor seleccionado
+  late RxString proveedorId;
+
+  // Listas de proveedores
+  late RxList<String> proveedoresIds;
+  late RxList<String> proveedoresNombres;
+
+  // Controlador de registros
+  late RegistrosController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Obtener el controlador
+    controller = Get.find<RegistrosController>();
+
+    // Inicializar controladores con valores del material si existe
+    nombreController = TextEditingController(
+      text: widget.material?.nombre ?? '',
     );
-    final cantidadController = TextEditingController(
-      text: material?.cantidadDisponible.toString() ?? '0',
+    descripcionController = TextEditingController(
+      text: widget.material?.descripcion ?? '',
     );
-    final cantidadMinimaController = TextEditingController(
-      text: material?.cantidadMinima.toString() ?? '5',
+    precioController = TextEditingController(
+      text: widget.material?.precioUnitario.toString() ?? '0.0',
     );
-    
-    // Obtener fecha actual o fecha del material si existe
-    final DateTime fechaInicial = material?.fechaCompra ?? DateTime.now();
-    final fechaController = TextEditingController(
-      text: DateFormat('dd/MM/yyyy').format(fechaInicial),
+    cantidadController = TextEditingController(
+      text: widget.material?.cantidadDisponible.toString() ?? '0',
     );
-    
-    // Variables para tipo de material y campos específicos
-    Rx<TipoMaterial> tipoMaterial = Rx<TipoMaterial>(
-      material?.tipo ?? TipoMaterial.hoja,
+    cantidadMinimaController = TextEditingController(
+      text: widget.material?.cantidadMinima.toString() ?? '5',
     );
-    
-    // Variables específicas para Hoja
-    Rx<TipoHoja> tipoHoja = Rx<TipoHoja>(
-      material is HojaModel ? (material as HojaModel).tipoHoja : TipoHoja.normal,
+
+    // Obtener fecha del material o actual
+    fechaSeleccionada = widget.material?.fechaCompra ?? DateTime.now();
+    fechaController = TextEditingController(
+      text: DateFormat('dd/MM/yyyy').format(fechaSeleccionada),
     );
-    final tamanoController = TextEditingController(
-      text: material is HojaModel ? (material as HojaModel).tamano : 'Carta',
+
+    // Inicializar variables específicas para tipos de material
+    tipoMaterial = Rx<TipoMaterial>(widget.material?.tipo ?? TipoMaterial.hoja);
+
+    tipoHoja = Rx<TipoHoja>(
+      widget.material is HojaModel
+          ? (widget.material as HojaModel).tipoHoja
+          : TipoHoja.normal,
     );
-    
-    // Variables específicas para Laminado
-    Rx<TipoLaminado> tipoLaminado = Rx<TipoLaminado>(
-      material is LaminadoModel ? (material as LaminadoModel).tipoLaminado : TipoLaminado.mate,
+    tamanoController = TextEditingController(
+      text:
+          widget.material is HojaModel
+              ? (widget.material as HojaModel).tamano
+              : 'Carta',
     );
-    final grosorController = TextEditingController(
-      text: material is LaminadoModel ? (material as LaminadoModel).grosor : 'Normal',
+
+    tipoLaminado = Rx<TipoLaminado>(
+      widget.material is LaminadoModel
+          ? (widget.material as LaminadoModel).tipoLaminado
+          : TipoLaminado.mate,
     );
-    
+    grosorController = TextEditingController(
+      text:
+          widget.material is LaminadoModel
+              ? (widget.material as LaminadoModel).grosor
+              : 'Normal',
+    );
+
     // Lista de proveedores disponibles
-    final RxList<String> proveedoresIds = controller.proveedores
-        .map((p) => p.id)
-        .toList()
-        .obs;
-    final RxList<String> proveedoresNombres = controller.proveedores
-        .map((p) => p.nombre)
-        .toList()
-        .obs;
-        
+    proveedoresIds = controller.proveedores.map((p) => p.id).toList().obs;
+    proveedoresNombres =
+        controller.proveedores.map((p) => p.nombre).toList().obs;
+
     // Proveedor seleccionado
-    final RxString proveedorId = (material?.proveedorId ?? 
-        (proveedoresIds.isNotEmpty ? proveedoresIds.first : '')).obs;
-    
+    proveedorId =
+        (widget.material?.proveedorId ??
+                (proveedoresIds.isNotEmpty ? proveedoresIds.first : ''))
+            .obs;
+  }
+
+  @override
+  void dispose() {
+    // Liberar recursos al desmontar el widget
+    nombreController.dispose();
+    descripcionController.dispose();
+    precioController.dispose();
+    cantidadController.dispose();
+    cantidadMinimaController.dispose();
+    fechaController.dispose();
+    tamanoController.dispose();
+    grosorController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         // Barra superior
@@ -78,7 +138,7 @@ class FormMaterialComponent extends GetView<RegistrosController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                material == null ? 'Nuevo Material' : 'Editar Material',
+                widget.material == null ? 'Nuevo Material' : 'Editar Material',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -92,7 +152,7 @@ class FormMaterialComponent extends GetView<RegistrosController> {
             ],
           ),
         ),
-        
+
         // Contenido del formulario
         Expanded(
           child: SingleChildScrollView(
@@ -103,35 +163,39 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                 // Tipo de Material
                 const Text('Tipo de Material'),
                 const SizedBox(height: 8),
-                
+
                 // Selector de tipo de material
-                Obx(() => CupertinoSegmentedControl<TipoMaterial>(
-                  children: const {
-                    TipoMaterial.hoja: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Hoja'),
-                    ),
-                    TipoMaterial.laminado: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Laminado'),
-                    ),
-                    TipoMaterial.tinta: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Tinta'),
-                    ),
-                    TipoMaterial.otros: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Otros'),
-                    ),
-                  },
-                  groupValue: tipoMaterial.value,
-                  onValueChanged: (value) {
-                    tipoMaterial.value = value;
-                  },
-                )),
-                
+                Obx(
+                  () => CupertinoSegmentedControl<TipoMaterial>(
+                    children: const {
+                      TipoMaterial.hoja: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Hoja'),
+                      ),
+                      TipoMaterial.laminado: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Laminado'),
+                      ),
+                      TipoMaterial.tinta: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Tinta'),
+                      ),
+                      TipoMaterial.otros: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Otros'),
+                      ),
+                    },
+                    groupValue: tipoMaterial.value,
+                    onValueChanged: (value) {
+                      setState(() {
+                        tipoMaterial.value = value;
+                      });
+                    },
+                  ),
+                ),
+
                 const SizedBox(height: 24),
-                
+
                 // Campos comunes
                 const Text('Nombre'),
                 const SizedBox(height: 8),
@@ -140,9 +204,9 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                   placeholder: 'Nombre del material',
                   padding: const EdgeInsets.all(12),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 const Text('Descripción'),
                 const SizedBox(height: 8),
                 CupertinoTextField(
@@ -151,24 +215,26 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                   padding: const EdgeInsets.all(12),
                   maxLines: 2,
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 const Text('Precio Unitario (Q)'),
                 const SizedBox(height: 8),
                 CupertinoTextField(
                   controller: precioController,
                   placeholder: '0.00',
                   padding: const EdgeInsets.all(12),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   prefix: const Padding(
                     padding: EdgeInsets.only(left: 8.0),
                     child: Text('Q'),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Fila de cantidad disponible y mínima
                 Row(
                   children: [
@@ -187,9 +253,9 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(width: 16),
-                    
+
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,13 +273,13 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Selector de proveedor
                 const Text('Proveedor'),
                 const SizedBox(height: 8),
-                
+
                 Obx(() {
                   if (proveedoresNombres.isEmpty) {
                     return Container(
@@ -239,20 +305,16 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                       ),
                     );
                   }
-                  
-                  int selectedIndex = proveedorId.value.isEmpty 
-                      ? 0 
-                      : proveedoresIds.indexOf(proveedorId.value);
-                  
+
+                  int selectedIndex =
+                      proveedorId.value.isEmpty
+                          ? 0
+                          : proveedoresIds.indexOf(proveedorId.value);
+
                   if (selectedIndex < 0) selectedIndex = 0;
-                  
+
                   return GestureDetector(
-                    onTap: () => _mostrarSelectorProveedor(
-                      context, 
-                      proveedoresNombres, 
-                      proveedoresIds, 
-                      proveedorId,
-                    ),
+                    onTap: () => _mostrarSelectorProveedor(context),
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -274,14 +336,14 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                     ),
                   );
                 }),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Fecha de compra
                 const Text('Fecha de Compra'),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () => _mostrarSelectorFecha(context, fechaController, fechaInicial),
+                  onTap: () => _mostrarSelectorFecha(context),
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -302,9 +364,9 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Campos específicos según tipo de material
                 Obx(() {
                   // Campos para Hoja
@@ -319,9 +381,9 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         const Text('Tipo de Hoja'),
                         const SizedBox(height: 8),
                         CupertinoSegmentedControl<TipoHoja>(
@@ -341,12 +403,14 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                           },
                           groupValue: tipoHoja.value,
                           onValueChanged: (value) {
-                            tipoHoja.value = value;
+                            setState(() {
+                              tipoHoja.value = value;
+                            });
                           },
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         const Text('Tamaño'),
                         const SizedBox(height: 8),
                         CupertinoTextField(
@@ -357,7 +421,6 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                       ],
                     );
                   }
-                  
                   // Campos para Laminado
                   else if (tipoMaterial.value == TipoMaterial.laminado) {
                     return Column(
@@ -370,9 +433,9 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         const Text('Tipo de Laminado'),
                         const SizedBox(height: 8),
                         CupertinoSegmentedControl<TipoLaminado>(
@@ -381,6 +444,7 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                               padding: EdgeInsets.symmetric(horizontal: 16),
                               child: Text('Mate'),
                             ),
+
                             TipoLaminado.brillante: Padding(
                               padding: EdgeInsets.symmetric(horizontal: 16),
                               child: Text('Brillante'),
@@ -392,12 +456,14 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                           },
                           groupValue: tipoLaminado.value,
                           onValueChanged: (value) {
-                            tipoLaminado.value = value;
+                            setState(() {
+                              tipoLaminado.value = value;
+                            });
                           },
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         const Text('Grosor'),
                         const SizedBox(height: 8),
                         CupertinoTextField(
@@ -408,23 +474,23 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                       ],
                     );
                   }
-                  
+
                   // No hay campos específicos para otros tipos
                   return const SizedBox.shrink();
                 }),
-                
+
                 const SizedBox(height: 32),
               ],
             ),
           ),
         ),
-        
+
         // Botones de acción
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              if (material != null) ...[
+              if (widget.material != null) ...[
                 // Botón Eliminar (solo en modo edición)
                 Expanded(
                   child: CupertinoButton(
@@ -434,31 +500,17 @@ class FormMaterialComponent extends GetView<RegistrosController> {
                     onPressed: () => _confirmarEliminar(context),
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
               ],
-              
+
               // Botón Guardar
               Expanded(
                 child: CupertinoButton(
                   padding: const EdgeInsets.all(12),
                   color: CupertinoColors.activeBlue,
-                  child: Text(material == null ? 'Crear' : 'Actualizar'),
-                  onPressed: () => _guardarMaterial(
-                    context,
-                    tipoMaterial.value,
-                    nombreController.text,
-                    descripcionController.text,
-                    precioController.text,
-                    cantidadController.text,
-                    cantidadMinimaController.text,
-                    proveedorId.value,
-                    fechaController.text,
-                    tipoHoja.value,
-                    tamanoController.text,
-                    tipoLaminado.value,
-                    grosorController.text,
-                  ),
+                  child: Text(widget.material == null ? 'Crear' : 'Actualizar'),
+                  onPressed: () => _guardarMaterial(context),
                 ),
               ),
             ],
@@ -467,164 +519,146 @@ class FormMaterialComponent extends GetView<RegistrosController> {
       ],
     );
   }
-  
+
   // Mostrar selector de proveedor
-  void _mostrarSelectorProveedor(
-    BuildContext context,
-    RxList<String> nombres,
-    RxList<String> ids,
-    RxString proveedorId,
-  ) {
+  void _mostrarSelectorProveedor(BuildContext context) {
     showCupertinoModalPopup(
       context: context,
-      builder: (context) => Container(
-        height: 300,
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: CupertinoColors.systemBackground,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Seleccionar Proveedor',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+      builder:
+          (context) => Container(
+            height: 300,
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: CupertinoColors.systemBackground,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
               ),
             ),
-            
-            const SizedBox(height: 16),
-            
-            // Lista de proveedores
-            Expanded(
-              child: ListView.builder(
-                itemCount: nombres.length,
-                itemBuilder: (context, index) {
-                  return CupertinoButton(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    onPressed: () {
-                      proveedorId.value = ids[index];
-                      Navigator.pop(context);
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(nombres[index]),
-                        if (ids[index] == proveedorId.value)
-                          const Icon(
-                            CupertinoIcons.check_mark,
-                            color: CupertinoColors.activeBlue,
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            
-            // Botón para cerrar
-            Center(
-              child: CupertinoButton(
-                child: const Text('Cancelar'),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  // Mostrar selector de fecha
-  void _mostrarSelectorFecha(
-    BuildContext context,
-    TextEditingController fechaController,
-    DateTime fechaInicial,
-  ) {
-    DateTime fechaSeleccionada = fechaInicial;
-    
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => Container(
-        height: 400,
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: CupertinoColors.systemBackground,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          children: [
-            const Text(
-              'Seleccionar Fecha',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Selector de fecha
-            Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: fechaInicial,
-                maximumDate: DateTime.now(),
-                onDateTimeChanged: (DateTime date) {
-                  fechaSeleccionada = date;
-                },
-              ),
-            ),
-            
-            // Botones
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CupertinoButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () => Navigator.pop(context),
+                const Text(
+                  'Seleccionar Proveedor',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                CupertinoButton(
-                  child: const Text('Aceptar'),
-                  onPressed: () {
-                    fechaController.text = DateFormat('dd/MM/yyyy').format(fechaSeleccionada);
-                    Navigator.pop(context);
-                  },
+
+                const SizedBox(height: 16),
+
+                // Lista de proveedores
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: proveedoresNombres.length,
+                    itemBuilder: (context, index) {
+                      return CupertinoButton(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        onPressed: () {
+                          setState(() {
+                            proveedorId.value = proveedoresIds[index];
+                          });
+                          Navigator.pop(context);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(proveedoresNombres[index]),
+                            if (proveedoresIds[index] == proveedorId.value)
+                              const Icon(
+                                CupertinoIcons.check_mark,
+                                color: CupertinoColors.activeBlue,
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                // Botón para cerrar
+                Center(
+                  child: CupertinoButton(
+                    child: const Text('Cancelar'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
-  
+
+  // Mostrar selector de fecha
+  void _mostrarSelectorFecha(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder:
+          (context) => Container(
+            height: 400,
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: CupertinoColors.systemBackground,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              children: [
+                const Text(
+                  'Seleccionar Fecha',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Selector de fecha
+                Expanded(
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.date,
+                    initialDateTime: fechaSeleccionada,
+                    maximumDate: DateTime.now(),
+                    onDateTimeChanged: (DateTime date) {
+                      setState(() {
+                        fechaSeleccionada = date;
+                      });
+                    },
+                  ),
+                ),
+
+                // Botones
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    CupertinoButton(
+                      child: const Text('Cancelar'),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    CupertinoButton(
+                      child: const Text('Aceptar'),
+                      onPressed: () {
+                        setState(() {
+                          fechaController.text = DateFormat(
+                            'dd/MM/yyyy',
+                          ).format(fechaSeleccionada);
+                        });
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
   // Guardar material (crear nuevo o actualizar existente)
-  void _guardarMaterial(
-    BuildContext context,
-    TipoMaterial tipo,
-    String nombre,
-    String descripcion,
-    String precioText,
-    String cantidadText,
-    String cantidadMinimaText,
-    String proveedorId,
-    String fechaText,
-    TipoHoja tipoHoja,
-    String tamano,
-    TipoLaminado tipoLaminado,
-    String grosor,
-  ) {
+  void _guardarMaterial(BuildContext context) {
     // Validar campos obligatorios
-    if (nombre.isEmpty || precioText.isEmpty || cantidadText.isEmpty || proveedorId.isEmpty) {
+    if (nombreController.text.isEmpty ||
+        precioController.text.isEmpty ||
+        cantidadController.text.isEmpty ||
+        proveedorId.value.isEmpty) {
       Get.snackbar(
         'Error',
         'Nombre, precio, cantidad disponible y proveedor son obligatorios',
@@ -632,40 +666,40 @@ class FormMaterialComponent extends GetView<RegistrosController> {
       );
       return;
     }
-    
+
     try {
       // Convertir valores numéricos
-      double precio = double.parse(precioText);
-      int cantidad = int.parse(cantidadText);
-      int cantidadMinima = int.parse(cantidadMinimaText);
-      
+      double precio = double.parse(precioController.text);
+      int cantidad = int.parse(cantidadController.text);
+      int cantidadMinima = int.parse(cantidadMinimaController.text);
+
       // Convertir fecha
       DateTime fecha;
       try {
-        fecha = DateFormat('dd/MM/yyyy').parse(fechaText);
+        fecha = DateFormat('dd/MM/yyyy').parse(fechaController.text);
       } catch (e) {
         fecha = DateTime.now();
       }
-      
+
       // Crear o actualizar según tipo de material
-      if (tipo == TipoMaterial.hoja) {
+      if (tipoMaterial.value == TipoMaterial.hoja) {
         HojaModel hoja;
-        
-        if (material == null) {
+
+        if (widget.material == null) {
           // Crear nueva hoja
           hoja = HojaModel(
             id: '',
-            nombre: nombre,
-            descripcion: descripcion,
+            nombre: nombreController.text,
+            descripcion: descripcionController.text,
             precioUnitario: precio,
             cantidadDisponible: cantidad,
             cantidadMinima: cantidadMinima,
-            proveedorId: proveedorId,
+            proveedorId: proveedorId.value,
             fechaCompra: fecha,
-            tipoHoja: tipoHoja,
-            tamano: tamano,
+            tipoHoja: tipoHoja.value,
+            tamano: tamanoController.text,
           );
-          
+
           controller.crearHoja(hoja).then((success) {
             if (success) {
               Navigator.pop(context);
@@ -678,34 +712,34 @@ class FormMaterialComponent extends GetView<RegistrosController> {
           });
         } else {
           // Actualizar hoja existente
-          if (material is HojaModel) {
-            hoja = (material as HojaModel).copyWithHoja(
-              nombre: nombre,
-              descripcion: descripcion,
+          if (widget.material is HojaModel) {
+            hoja = (widget.material as HojaModel).copyWithHoja(
+              nombre: nombreController.text,
+              descripcion: descripcionController.text,
               precioUnitario: precio,
               cantidadDisponible: cantidad,
               cantidadMinima: cantidadMinima,
-              proveedorId: proveedorId,
+              proveedorId: proveedorId.value,
               fechaCompra: fecha,
-              tipoHoja: tipoHoja,
-              tamano: tamano,
+              tipoHoja: tipoHoja.value,
+              tamano: tamanoController.text,
             );
           } else {
             // Si el material era de otro tipo, crear uno nuevo
             hoja = HojaModel(
-              id: material!.id,
-              nombre: nombre,
-              descripcion: descripcion,
+              id: widget.material!.id,
+              nombre: nombreController.text,
+              descripcion: descripcionController.text,
               precioUnitario: precio,
               cantidadDisponible: cantidad,
               cantidadMinima: cantidadMinima,
-              proveedorId: proveedorId,
+              proveedorId: proveedorId.value,
               fechaCompra: fecha,
-              tipoHoja: tipoHoja,
-              tamano: tamano,
+              tipoHoja: tipoHoja.value,
+              tamano: tamanoController.text,
             );
           }
-          
+
           controller.actualizarMaterial(hoja).then((success) {
             if (success) {
               Navigator.pop(context);
@@ -717,25 +751,24 @@ class FormMaterialComponent extends GetView<RegistrosController> {
             }
           });
         }
-      } 
-      else if (tipo == TipoMaterial.laminado) {
+      } else if (tipoMaterial.value == TipoMaterial.laminado) {
         LaminadoModel laminado;
-        
-        if (material == null) {
+
+        if (widget.material == null) {
           // Crear nuevo laminado
           laminado = LaminadoModel(
             id: '',
-            nombre: nombre,
-            descripcion: descripcion,
+            nombre: nombreController.text,
+            descripcion: descripcionController.text,
             precioUnitario: precio,
             cantidadDisponible: cantidad,
             cantidadMinima: cantidadMinima,
-            proveedorId: proveedorId,
+            proveedorId: proveedorId.value,
             fechaCompra: fecha,
-            tipoLaminado: tipoLaminado,
-            grosor: grosor,
+            tipoLaminado: tipoLaminado.value,
+            grosor: grosorController.text,
           );
-          
+
           controller.crearLaminado(laminado).then((success) {
             if (success) {
               Navigator.pop(context);
@@ -748,34 +781,34 @@ class FormMaterialComponent extends GetView<RegistrosController> {
           });
         } else {
           // Actualizar laminado existente
-          if (material is LaminadoModel) {
-            laminado = (material as LaminadoModel).copyWithLaminado(
-              nombre: nombre,
-              descripcion: descripcion,
+          if (widget.material is LaminadoModel) {
+            laminado = (widget.material as LaminadoModel).copyWithLaminado(
+              nombre: nombreController.text,
+              descripcion: descripcionController.text,
               precioUnitario: precio,
               cantidadDisponible: cantidad,
               cantidadMinima: cantidadMinima,
-              proveedorId: proveedorId,
+              proveedorId: proveedorId.value,
               fechaCompra: fecha,
-              tipoLaminado: tipoLaminado,
-              grosor: grosor,
+              tipoLaminado: tipoLaminado.value,
+              grosor: grosorController.text,
             );
           } else {
             // Si el material era de otro tipo, crear uno nuevo
             laminado = LaminadoModel(
-              id: material!.id,
-              nombre: nombre,
-              descripcion: descripcion,
+              id: widget.material!.id,
+              nombre: nombreController.text,
+              descripcion: descripcionController.text,
               precioUnitario: precio,
               cantidadDisponible: cantidad,
               cantidadMinima: cantidadMinima,
-              proveedorId: proveedorId,
+              proveedorId: proveedorId.value,
               fechaCompra: fecha,
-              tipoLaminado: tipoLaminado,
-              grosor: grosor,
+              tipoLaminado: tipoLaminado.value,
+              grosor: grosorController.text,
             );
           }
-          
+
           controller.actualizarMaterial(laminado).then((success) {
             if (success) {
               Navigator.pop(context);
@@ -787,41 +820,40 @@ class FormMaterialComponent extends GetView<RegistrosController> {
             }
           });
         }
-      } 
-      else {
+      } else {
         // Otros tipos de material
         MaterialModel nuevoMaterial;
-        
-        if (material == null) {
+
+        if (widget.material == null) {
           // Crear nuevo material
           nuevoMaterial = MaterialModel(
             id: '',
-            nombre: nombre,
-            descripcion: descripcion,
-            tipo: tipo,
+            nombre: nombreController.text,
+            descripcion: descripcionController.text,
+            tipo: tipoMaterial.value,
             precioUnitario: precio,
             cantidadDisponible: cantidad,
             cantidadMinima: cantidadMinima,
-            proveedorId: proveedorId,
+            proveedorId: proveedorId.value,
             fechaCompra: fecha,
           );
         } else {
           // Actualizar material existente
-          nuevoMaterial = material!.copyWith(
-            nombre: nombre,
-            descripcion: descripcion,
-            tipo: tipo,
+          nuevoMaterial = widget.material!.copyWith(
+            nombre: nombreController.text,
+            descripcion: descripcionController.text,
+            tipo: tipoMaterial.value,
             precioUnitario: precio,
             cantidadDisponible: cantidad,
             cantidadMinima: cantidadMinima,
-            proveedorId: proveedorId,
+            proveedorId: proveedorId.value,
             fechaCompra: fecha,
           );
         }
-        
+
         // Guardar material
-        if (material == null) {
-          // Si es un material genérico, usar el método de hojas (el servicio se encargará)
+        if (widget.material == null) {
+          // Si es un material genérico, usar el método crear
           controller.crearHoja(nuevoMaterial as HojaModel).then((success) {
             if (success) {
               Navigator.pop(context);
@@ -853,39 +885,44 @@ class FormMaterialComponent extends GetView<RegistrosController> {
       );
     }
   }
-  
+
   // Confirmar eliminación de material
   void _confirmarEliminar(BuildContext context) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Confirmar Eliminación'),
-        content: Text('¿Está seguro que desea eliminar el material "${material!.nombre}"?'),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.pop(context),
+      builder:
+          (context) => CupertinoAlertDialog(
+            title: const Text('Confirmar Eliminación'),
+            content: Text(
+              '¿Está seguro que desea eliminar el material "${widget.material!.nombre}"?',
+            ),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('Cancelar'),
+                onPressed: () => Navigator.pop(context),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                child: const Text('Eliminar'),
+                onPressed: () {
+                  Navigator.pop(context); // Cerrar el diálogo
+
+                  controller.eliminarMaterial(widget.material!.id).then((
+                    success,
+                  ) {
+                    if (success) {
+                      Navigator.pop(context); // Cerrar el formulario
+                      Get.snackbar(
+                        'Éxito',
+                        'Material eliminado correctamente',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    }
+                  });
+                },
+              ),
+            ],
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: const Text('Eliminar'),
-            onPressed: () {
-              Navigator.pop(context); // Cerrar el diálogo
-              
-              controller.eliminarMaterial(material!.id).then((success) {
-                if (success) {
-                  Navigator.pop(context); // Cerrar el formulario
-                  Get.snackbar(
-                    'Éxito',
-                    'Material eliminado correctamente',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                }
-              });
-            },
-          ),
-        ],
-      ),
     );
   }
 }

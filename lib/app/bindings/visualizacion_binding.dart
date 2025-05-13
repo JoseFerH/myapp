@@ -27,7 +27,7 @@ class VisualizacionBinding implements Bindings {
       Get.put(PDFService(), permanent: true);
     }
     
-    // Inyectar el controlador
-    Get.lazyPut<VisualizacionController>(() => VisualizacionController());
+        // Usar Get.put en lugar de Get.lazyPut para inicialización inmediata
+    Get.put<VisualizacionController>(VisualizacionController(), permanent: true);
   }
 }

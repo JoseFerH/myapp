@@ -6,32 +6,13 @@ import '../../widgets/error_message.dart';
 import 'views/clientes_view.dart';
 import 'views/proveedores_view.dart';
 import 'views/inventario_view.dart';
-import '../../data/services/cliente_service.dart';
-import '../../data/services/material_service.dart';
-import '../../data/services/venta_service.dart';
 
 class RegistrosView extends GetView<RegistrosController> {
   const RegistrosView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Inicializar todos los servicios necesarios antes del controlador
-    if (!Get.isRegistered<ClienteService>()) {
-      Get.put(ClienteService().init(), permanent: true);
-    }
-    
-    if (!Get.isRegistered<MaterialService>()) {
-      Get.put(MaterialService().init(), permanent: true);
-    }
-    
-    if (!Get.isRegistered<VentaService>()) {
-      Get.put(VentaService().init(), permanent: true);
-    }
-    
-    // Ahora sí, inicializar el controlador
-    if (!Get.isRegistered<RegistrosController>()) {
-      Get.put(RegistrosController());
-    }
+    // Quitar la inicialización de servicios de aquí, ya se encarga el binding
     
     return CupertinoPageScaffold(
       child: SafeArea(

@@ -6,6 +6,12 @@ import 'firebase_options.dart';
 import 'app/routes/app_pages.dart';
 import 'app/data/providers/db_provider.dart';
 
+
+import 'app/data/services/cliente_service.dart';
+import 'app/data/services/material_service.dart';
+import 'app/data/services/venta_service.dart';
+import 'app/controllers/registros_controller.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -39,7 +45,13 @@ void main() async {
     print('Error initializing DB: $e');
     // Continuar a pesar del error
   }
-  
+  // Al final de la función main(), antes de runApp:
+  // Inicializar controladores y servicios esenciales
+  Get.put(ClienteService(), permanent: true).init();
+  Get.put(MaterialService(), permanent: true).init();
+  Get.put(VentaService(), permanent: true).init();
+  Get.put(RegistrosController(), permanent: true);
+
   runApp(
     GetCupertinoApp(
       title: "Creati Calculator",

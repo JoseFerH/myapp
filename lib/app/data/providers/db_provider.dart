@@ -18,44 +18,44 @@ class DBProvider {
   CollectionReference get configuracionRef => _firestore.collection('configuracion');
   
   // Inicializar configuración de Firestore
-  Future<void> inicializarDB() async {
-    // Configurar índices y cache si es necesario
-    await _firestore.settings.persistenceEnabled;
-    
-    // Verificar que existe documento de configuración
-    try {
-      final configDoc = await configuracionRef.doc('config').get();
-      if (!configDoc.exists) {
-        // Crear configuración por defecto si no existe
-        await configuracionRef.doc('config').set({
-          'porcentajeGananciasMin': 50.0,
-          'porcentajeGananciasDefault': 50.0,
-          'precioDisenioEstandar': 0.0,
-          'precioDisenioPersonalizado': 50.0,
-          'costoEnvioNormal': 18.0,
-          'costoEnvioExpress': 30.0,
-          'aplicarDesperdicioDefault': true,
-          'porcentajeDesperdicio': 5.0,
-          'precioCuartoHoja': 20.0,
-          'precioMediaHoja': 15.0,
-          'precioRedesSociales': 90.0,
-          'precioMayorista': 10.0,
-          'cantidadMayorista': 100,
-        });
-      }
-      
-      // Verificar si existen costos fijos predeterminados
-      final costosFijos = await costosFijosRef.limit(1).get();
-      if (costosFijos.docs.isEmpty) {
-        // Crear costos fijos predeterminados
-        await _crearCostosFijosPredeterminados();
-      }
-      
-    } catch (e) {
-      print('Error inicializando DB: $e');
-      rethrow;
+  // Inicializar configuración de Firestore
+Future<void> inicializarDB() async {
+  // Ya no intentamos configurar persistencia aquí, se hace en main.dart
+  
+  // Verificar que existe documento de configuración
+  try {
+    final configDoc = await configuracionRef.doc('config').get();
+    if (!configDoc.exists) {
+      // Crear configuración por defecto si no existe
+      await configuracionRef.doc('config').set({
+        'porcentajeGananciasMin': 50.0,
+        'porcentajeGananciasDefault': 50.0,
+        'precioDisenioEstandar': 0.0,
+        'precioDisenioPersonalizado': 50.0,
+        'costoEnvioNormal': 18.0,
+        'costoEnvioExpress': 30.0,
+        'aplicarDesperdicioDefault': true,
+        'porcentajeDesperdicio': 5.0,
+        'precioCuartoHoja': 20.0,
+        'precioMediaHoja': 15.0,
+        'precioRedesSociales': 90.0,
+        'precioMayorista': 10.0,
+        'cantidadMayorista': 100,
+      });
     }
+    
+    // Verificar si existen costos fijos predeterminados
+    final costosFijos = await costosFijosRef.limit(1).get();
+    if (costosFijos.docs.isEmpty) {
+      // Crear costos fijos predeterminados
+      await _crearCostosFijosPredeterminados();
+    }
+    
+  } catch (e) {
+    print('Error inicializando DB: $e');
+    rethrow;
   }
+}
   
   // Crear costos fijos predeterminados
   Future<void> _crearCostosFijosPredeterminados() async {

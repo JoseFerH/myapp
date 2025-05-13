@@ -40,47 +40,56 @@ class AppPages {
       children: [
         // Rutas principales para las secciones del bottom navigation
         GetPage(
-          name: AppRoutes.CALCULADORA.replaceFirst('/', ''),
+          // Asegurarse de que el nombre comience con '/'
+          name: '/' + AppRoutes.CALCULADORA.replaceFirst('/', ''),
           page: () => const CalculadoraView(),
           binding: CalculadoraBinding(),
         ),
         GetPage(
-          name: AppRoutes.CARRITO.replaceFirst('/', ''),
+          // Asegurarse de que el nombre comience con '/'
+          name: '/' + AppRoutes.CARRITO.replaceFirst('/', ''),
           page: () => const CarritoView(),
           binding: CarritoBinding(),
         ),
         GetPage(
-          name: AppRoutes.REGISTROS.replaceFirst('/', ''),
+          // Asegurarse de que el nombre comience con '/'
+          name: '/' + AppRoutes.REGISTROS.replaceFirst('/', ''),
           page: () => const RegistrosView(),
           binding: RegistrosBinding(),
           children: [
             // Sub-rutas para registros
             GetPage(
-              name: AppRoutes.CLIENTES.split('/').last,
+              // Asegurarse de que el nombre comience con '/'
+              name: '/' + AppRoutes.CLIENTES.split('/').last,
               page: () => const ClientesView(),
             ),
             GetPage(
-              name: AppRoutes.PROVEEDORES.split('/').last,
+              // Asegurarse de que el nombre comience con '/'
+              name: '/' + AppRoutes.PROVEEDORES.split('/').last,
               page: () => const ProveedoresView(),
             ),
             GetPage(
-              name: AppRoutes.INVENTARIO.split('/').last,
+              // Asegurarse de que el nombre comience con '/'
+              name: '/' + AppRoutes.INVENTARIO.split('/').last,
               page: () => const InventarioView(),
             ),
           ],
         ),
         GetPage(
-          name: AppRoutes.VISUALIZACION.replaceFirst('/', ''),
+          // Asegurarse de que el nombre comience con '/'
+          name: '/' + AppRoutes.VISUALIZACION.replaceFirst('/', ''),
           page: () => const VisualizacionView(),
           binding: VisualizacionBinding(),
         ),
         GetPage(
-          name: AppRoutes.ESTADISTICAS.replaceFirst('/', ''),
+          // Asegurarse de que el nombre comience con '/'
+          name: '/' + AppRoutes.ESTADISTICAS.replaceFirst('/', ''),
           page: () => const EstadisticasView(),
           binding: EstadisticasBinding(),
         ),
         GetPage(
-          name: AppRoutes.CONFIGURACION.replaceFirst('/', ''),
+          // Asegurarse de que el nombre comience con '/'
+          name: '/' + AppRoutes.CONFIGURACION.replaceFirst('/', ''),
           page: () => const ConfiguracionView(),
           binding: ConfiguracionBinding(),
         ),
@@ -118,13 +127,5 @@ class AppPages {
       page: () => const ConfiguracionView(),
       binding: ConfiguracionBinding(),
     ),
-    
-    // Rutas específicas para vistas de detalle y formularios
-    // Estas rutas se definirían después de implementar sus vistas correspondientes
-    // Por ejemplo:
-    // GetPage(
-    //   name: AppRoutes.DETALLE_CLIENTE,
-    //   page: () => const DetalleClienteView(),
-    // ),
   ];
 }

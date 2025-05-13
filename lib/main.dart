@@ -7,11 +7,17 @@ import 'app/routes/app_pages.dart';
 import 'app/data/providers/db_provider.dart';
 import 'app/data/services/calculadora_service.dart';
 import 'app/data/services/carrito_service.dart';
+import 'app/data/services/cliente_service.dart';
+import 'app/data/services/material_service.dart';
+import 'app/data/services/venta_service.dart';
+import 'app/data/services/pdf_service.dart';
+import 'app/data/services/exportacion_service.dart';
+import 'app/data/services/estadisticas_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar Firebase con manejo de errores
+  // Inicializar Firebase with error handling
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -20,7 +26,7 @@ void main() async {
     print('Firebase initialization error handled: $e');
   }
 
-  // Configurar Firestore
+  // Configure Firestore
   try {
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true,
@@ -30,7 +36,7 @@ void main() async {
     print('Error configuring Firestore: $e');
   }
 
-  // Inicializar la base de datos
+  // Initialize database
   try {
     final dbProvider = DBProvider();
     await dbProvider.inicializarDB();
@@ -38,9 +44,33 @@ void main() async {
     print('Error initializing DB: $e');
   }
 
-  // Pre-registrar servicios esenciales
-  Get.put(CalculadoraService(), permanent: true);
-  Get.put(CarritoService(), permanent: true);
+  // Pre-register essential services
+  final calculadoraService = CalculadoraService();
+  final carritoService = CarritoService();
+  final clienteService = ClienteService();
+  final materialService = MaterialService();
+  final ventaService = VentaService();
+  final pdfService = PDFService();
+  final exportacionService = ExportacionService();
+  final estadisticasService = EstadisticasService();
+
+  // Register all services with GetX
+  Get.put(calculadoraService, permanent: true);
+  Get.put(carritoService, permanent: true);
+  Get.put(clienteService, permanent: true);
+  Get.put(materialService, permanent: true);
+  Get.put(ventaService, permanent: true);
+  Get.put(pdfService, permanent: true);
+  Get.put(exportacionService, permanent: true);
+  Get.put(estadisticasService, permanent: true);
+
+  // Initialize services that require initialization
+  calculadoraService.init();
+  carritoService.init();
+  clienteService.init();
+  materialService.init();
+  ventaService.init();
+  estadisticasService.init();
 
   runApp(
     GetCupertinoApp(

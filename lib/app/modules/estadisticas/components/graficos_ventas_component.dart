@@ -35,14 +35,11 @@ class GraficosVentasComponent extends GetView<EstadisticasController> {
         children: [
           const Text(
             'Ventas por Día',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Gráfico de barras
           SizedBox(
             height: 250,
@@ -52,13 +49,11 @@ class GraficosVentasComponent extends GetView<EstadisticasController> {
                 return const Center(
                   child: Text(
                     'No hay datos disponibles para mostrar',
-                    style: TextStyle(
-                      color: CupertinoColors.systemGrey,
-                    ),
+                    style: TextStyle(color: CupertinoColors.systemGrey),
                   ),
                 );
               }
-              
+
               return BarChart(
                 BarChartData(
                   alignment: BarChartAlignment.spaceAround,
@@ -85,13 +80,15 @@ class GraficosVentasComponent extends GetView<EstadisticasController> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
-                          if (value < 0 || value >= controller.datosGraficoVentas.length) {
+                          if (value < 0 ||
+                              value >= controller.datosGraficoVentas.length) {
                             return const SizedBox();
                           }
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
-                              controller.datosGraficoVentas[value.toInt()]['dia'],
+                              controller.datosGraficoVentas[value
+                                  .toInt()]['dia'],
                               style: const TextStyle(
                                 color: CupertinoColors.systemGrey,
                                 fontSize: 12,
@@ -123,9 +120,7 @@ class GraficosVentasComponent extends GetView<EstadisticasController> {
                       sideTitles: SideTitles(showTitles: false),
                     ),
                   ),
-                  borderData: FlBorderData(
-                    show: false,
-                  ),
+                  borderData: FlBorderData(show: false),
                   barGroups: List.generate(
                     controller.datosGraficoVentas.length,
                     (index) {
@@ -162,29 +157,26 @@ class GraficosVentasComponent extends GetView<EstadisticasController> {
               );
             }),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Leyenda o descripción adicional
           const Text(
             'Ventas diarias en los últimos 7 días',
-            style: TextStyle(
-              color: CupertinoColors.systemGrey,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: CupertinoColors.systemGrey, fontSize: 12),
             textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
-  
+
   // Calcular el valor máximo para el eje Y
   double _calcularMaximoY() {
     if (controller.datosGraficoVentas.isEmpty) {
-      return 100; // Valor por defecto
+      return 100; // Valor por defecto si no hay datos
     }
-    
+
     double maxValue = 0;
     for (var dato in controller.datosGraficoVentas) {
       final double valor = dato['total'] ?? 0;
@@ -192,17 +184,25 @@ class GraficosVentasComponent extends GetView<EstadisticasController> {
         maxValue = valor;
       }
     }
-    
+
+    // Si el valor máximo es 0, devolver un valor por defecto
+    if (maxValue <= 0) {
+      return 100;
+    }
+
     // Agregar un 20% adicional para que la barra más alta no toque el borde superior
     return maxValue * 1.2;
   }
-  
+
   // Calcular el intervalo para las líneas horizontales
   double _calcularIntervaloY() {
     final maxY = _calcularMaximoY();
-    
+
     // Determinar un intervalo que dé entre 4 y 6 líneas
     final int numIntervalos = 5;
-    return maxY / numIntervalos;
+    double intervalo = maxY / numIntervalos;
+
+    // Asegurarse de que el intervalo nunca sea cero
+    return intervalo > 0 ? intervalo : 1.0;
   }
 }

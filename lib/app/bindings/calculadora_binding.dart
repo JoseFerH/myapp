@@ -6,16 +6,21 @@ import '../data/services/carrito_service.dart';
 class CalculadoraBinding implements Bindings {
   @override
   void dependencies() {
-    // Asegurarse de que los servicios estén disponibles
+    // Registrar los servicios de forma inmediata
     if (!Get.isRegistered<CalculadoraService>()) {
-      Get.put(CalculadoraService().init(), permanent: true);
+      final calculadoraService = CalculadoraService();
+      Get.put(calculadoraService, permanent: true);
+      // Inicializar el servicio (sin await para no bloquear)
+      calculadoraService.init();
     }
-    
+
     if (!Get.isRegistered<CarritoService>()) {
-      Get.put(CarritoService().init(), permanent: true);
+      final carritoService = CarritoService();
+      Get.put(carritoService, permanent: true);
+      carritoService.init();
     }
-    
-    // Inyectar el controlador
-    Get.lazyPut<CalculadoraController>(() => CalculadoraController());
+
+    // Registrar el controlador después de los servicios
+    Get.put(CalculadoraController());
   }
 }

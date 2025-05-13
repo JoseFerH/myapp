@@ -10,12 +10,29 @@ import 'components/preview_calculo_component.dart';
 import '../../widgets/loading_indicator.dart';
 import '../../widgets/error_message.dart';
 import '../../widgets/custom_button.dart';
+import '../../data/services/calculadora_service.dart';
+import '../../data/services/carrito_service.dart';
 
 class CalculadoraView extends GetView<CalculadoraController> {
   const CalculadoraView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Inicialización de emergencia si el binding falla
+    if (!Get.isRegistered<CalculadoraService>()) {
+      Get.put(CalculadoraService(), permanent: true);
+      Get.find<CalculadoraService>().init();
+    }
+
+    if (!Get.isRegistered<CarritoService>()) {
+      Get.put(CarritoService(), permanent: true);
+      Get.find<CarritoService>().init();
+    }
+
+    if (!Get.isRegistered<CalculadoraController>()) {
+      Get.put(CalculadoraController());
+    }
+
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Calculadora de Precios'),
@@ -26,7 +43,7 @@ class CalculadoraView extends GetView<CalculadoraController> {
           if (controller.cargando.value) {
             return const LoadingIndicator(message: 'Cargando materiales...');
           }
-          
+
           // Mostrar error si existe
           if (controller.error.value.isNotEmpty) {
             return ErrorMessage(
@@ -34,7 +51,7 @@ class CalculadoraView extends GetView<CalculadoraController> {
               onRetry: () => controller.onInit(),
             );
           }
-          
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -42,43 +59,39 @@ class CalculadoraView extends GetView<CalculadoraController> {
               children: [
                 // Selectores de material
                 const SelectorMaterialComponent(),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Selector de tamaño
                 const SelectorTamanoComponent(),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Selector de diseño
                 const SelectorDisenoComponent(),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Opciones adicionales
                 Row(
                   children: [
                     // Checkbox desperdicio
-                    const Expanded(
-                      child: CheckboxDesperdicioComponent(),
-                    ),
-                    
+                    const Expanded(child: CheckboxDesperdicioComponent()),
+
                     const SizedBox(width: 16),
-                    
+
                     // Input cantidad
-                    const Expanded(
-                      child: InputCantidadComponent(),
-                    ),
+                    const Expanded(child: InputCantidadComponent()),
                   ],
                 ),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Vista previa del cálculo
                 PreviewCalculoComponent(),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Botones de acción
                 Row(
                   children: [
@@ -90,9 +103,9 @@ class CalculadoraView extends GetView<CalculadoraController> {
                         onPressed: controller.resetear,
                       ),
                     ),
-                    
+
                     const SizedBox(width: 16),
-                    
+
                     // Botón Agregar al Carrito
                     Expanded(
                       child: CustomButton(

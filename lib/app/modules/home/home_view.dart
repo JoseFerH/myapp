@@ -1,5 +1,3 @@
-// lib/app/modules/home/home_view.dart
-
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
@@ -11,19 +9,31 @@ import '../../modules/estadisticas/estadisticas_view.dart';
 import '../../modules/registros/registros_view.dart';
 import '../../modules/visualizacion/visualizacion_view.dart';
 
+// Importar los controladores necesarios
+import '../../controllers/calculadora_controller.dart';
+import '../../controllers/carrito_controller.dart';
+import '../../controllers/estadisticas_controller.dart';
+import '../../controllers/registros_controller.dart';
+import '../../controllers/visualizacion_controller.dart';
+
+// Importar los servicios necesarios
+import '../../data/services/calculadora_service.dart';
+import '../../data/services/carrito_service.dart';
+import '../../data/services/cliente_service.dart';
+import '../../data/services/material_service.dart';
+import '../../data/services/venta_service.dart';
+import '../../data/services/estadisticas_service.dart';
+
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Lista de vistas para el PageView
-    final pages = [
-      const RegistrosView(),
-      const VisualizacionView(),
-      const CalculadoraView(),
-      const CarritoView(),
-      const EstadisticasView(),
-    ];
+    // Inicializar servicios que se usarán
+    _initServices();
+
+    // Inicializar controladores
+    _initControllers();
 
     // Lista de títulos para cada vista
     final titles = [
@@ -53,9 +63,16 @@ class HomeView extends GetView<HomeController> {
             Expanded(
               child: PageView(
                 controller: controller.pageController,
-                physics: const NeverScrollableScrollPhysics(), // Desactivar deslizamiento manual
+                physics:
+                    const NeverScrollableScrollPhysics(), // Desactivar deslizamiento manual
                 onPageChanged: controller.changeIndex,
-                children: pages,
+                children: [
+                  const RegistrosView(),
+                  const VisualizacionView(),
+                  const CalculadoraView(),
+                  const CarritoView(),
+                  const EstadisticasView(),
+                ],
               ),
             ),
             // Bottom Navigation Bar
@@ -64,5 +81,55 @@ class HomeView extends GetView<HomeController> {
         ),
       ),
     );
+  }
+
+  // Método para inicializar servicios
+  void _initServices() {
+    if (!Get.isRegistered<CalculadoraService>()) {
+      Get.put(CalculadoraService().init(), permanent: true);
+    }
+
+    if (!Get.isRegistered<CarritoService>()) {
+      Get.put(CarritoService().init(), permanent: true);
+    }
+
+    if (!Get.isRegistered<ClienteService>()) {
+      Get.put(ClienteService().init(), permanent: true);
+    }
+
+    if (!Get.isRegistered<MaterialService>()) {
+      Get.put(MaterialService().init(), permanent: true);
+    }
+
+    if (!Get.isRegistered<VentaService>()) {
+      Get.put(VentaService().init(), permanent: true);
+    }
+
+    if (!Get.isRegistered<EstadisticasService>()) {
+      Get.put(EstadisticasService().init(), permanent: true);
+    }
+  }
+
+  // Método para inicializar controladores
+  void _initControllers() {
+    if (!Get.isRegistered<CalculadoraController>()) {
+      Get.put(CalculadoraController());
+    }
+
+    if (!Get.isRegistered<CarritoController>()) {
+      Get.put(CarritoController());
+    }
+
+    if (!Get.isRegistered<RegistrosController>()) {
+      Get.put(RegistrosController());
+    }
+
+    if (!Get.isRegistered<VisualizacionController>()) {
+      Get.put(VisualizacionController());
+    }
+
+    if (!Get.isRegistered<EstadisticasController>()) {
+      Get.put(EstadisticasController());
+    }
   }
 }

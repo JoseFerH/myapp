@@ -6,7 +6,6 @@ import 'firebase_options.dart';
 import 'app/routes/app_pages.dart';
 import 'app/data/providers/db_provider.dart';
 
-
 import 'app/data/services/cliente_service.dart';
 import 'app/data/services/material_service.dart';
 import 'app/data/services/venta_service.dart';

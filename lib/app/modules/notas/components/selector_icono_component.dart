@@ -16,7 +16,7 @@ class SelectorIconoComponent extends StatelessWidget {
       {'id': 'cliente', 'icon': CupertinoIcons.person, 'label': 'Cliente'},
       {
         'id': 'proveedor',
-        'icon': CupertinoIcons.building_2,
+        'icon': CupertinoIcons.building_2_fill,
         'label': 'Proveedor',
       },
       {'id': 'hoja', 'icon': CupertinoIcons.doc, 'label': 'Hoja'},

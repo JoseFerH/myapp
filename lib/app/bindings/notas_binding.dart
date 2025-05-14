@@ -6,12 +6,12 @@ import '../data/services/notas_service.dart';
 class NotasBinding implements Bindings {
   @override
   void dependencies() {
-    // Servicios necesarios
+    // Registrar el servicio si no está registrado
     if (!Get.isRegistered<NotasService>()) {
-      Get.put(NotasService().init(), permanent: true);
+      Get.put(NotasService(), permanent: true);
     }
 
-    // Controlador
-    Get.lazyPut<NotasController>(() => NotasController());
+    // Registrar el controlador
+    Get.put(NotasController());
   }
 }

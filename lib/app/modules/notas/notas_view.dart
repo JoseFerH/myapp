@@ -2,6 +2,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../controllers/notas_controller.dart';
+import '../../data/models/nota_model.dart';
 import '../../widgets/loading_indicator.dart';
 import '../../widgets/error_message.dart';
 import '../../widgets/empty_state.dart';

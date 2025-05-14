@@ -22,14 +22,16 @@ class DBProvider {
   CollectionReference get notasRef => _firestore.collection('notas');
 
   // Inicializar configuración de Firestore
-  // Inicializar configuración de Firestore
   Future<void> inicializarDB() async {
-    // Ya no intentamos configurar persistencia aquí, se hace en main.dart
+    print("DBProvider: Inicializando base de datos");
 
     // Verificar que existe documento de configuración
     try {
       final configDoc = await configuracionRef.doc('config').get();
+      print("DBProvider: Verificando configuración");
+
       if (!configDoc.exists) {
+        print("DBProvider: Creando configuración por defecto");
         // Crear configuración por defecto si no existe
         await configuracionRef.doc('config').set({
           'porcentajeGananciasMin': 50.0,
@@ -49,11 +51,24 @@ class DBProvider {
       }
 
       // Verificar si existen costos fijos predeterminados
+      print("DBProvider: Verificando costos fijos");
       final costosFijos = await costosFijosRef.limit(1).get();
       if (costosFijos.docs.isEmpty) {
+        print("DBProvider: Creando costos fijos predeterminados");
         // Crear costos fijos predeterminados
         await _crearCostosFijosPredeterminados();
       }
+
+      // Verificar si hay materiales
+      print("DBProvider: Verificando materiales");
+      final materiales = await materialesRef.limit(1).get();
+      if (materiales.docs.isEmpty) {
+        print("DBProvider: Creando materiales de ejemplo");
+        // Crear materiales de ejemplo
+        await _crearMaterialesEjemplo();
+      }
+
+      print("DBProvider: Inicialización completada");
     } catch (e) {
       print('Error inicializando DB: $e');
       rethrow;
@@ -108,6 +123,48 @@ class DBProvider {
     }
 
     await batch.commit();
+  }
+
+  // Crear materiales de ejemplo
+  Future<void> _crearMaterialesEjemplo() async {
+    // Ejemplo de proveedor
+    final proveedorRef = proveedoresRef.doc();
+    await proveedorRef.set({
+      'nombre': 'Proveedor Ejemplo',
+      'contacto': 'Juan Pérez',
+      'telefono': '12345678',
+      'email': 'ejemplo@gmail.com',
+      'direccion': 'Ciudad de Guatemala',
+      'productos': ['Hojas', 'Laminados'],
+    });
+
+    // Ejemplo de hoja
+    await materialesRef.doc().set({
+      'nombre': 'Hoja Estándar',
+      'descripcion': 'Hoja de papel estándar para stickers',
+      'tipo': 'hoja',
+      'tipoHoja': 'normal',
+      'tamano': 'Carta',
+      'precioUnitario': 20.0,
+      'cantidadDisponible': 50,
+      'cantidadMinima': 10,
+      'proveedorId': proveedorRef.id,
+      'fechaCompra': Timestamp.now(),
+    });
+
+    // Ejemplo de laminado
+    await materialesRef.doc().set({
+      'nombre': 'Laminado Mate',
+      'descripcion': 'Laminado mate para stickers',
+      'tipo': 'laminado',
+      'tipoLaminado': 'mate',
+      'grosor': 'Normal',
+      'precioUnitario': 15.0,
+      'cantidadDisponible': 40,
+      'cantidadMinima': 8,
+      'proveedorId': proveedorRef.id,
+      'fechaCompra': Timestamp.now(),
+    });
   }
 
   // Método para generar un ID único para documentos

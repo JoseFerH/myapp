@@ -134,5 +134,15 @@ class AppPages {
       page: () => const ConfiguracionView(),
       binding: ConfiguracionBinding(),
     ),
+    GetPage(
+      name: AppRoutes.NOTAS,
+      page: () => const NotasView(),
+      binding: NotasBinding(),
+    ),
+    //     GetPage(
+    //       name: AppRoutes.NOTAS,
+    //       page: () => NotasModuleView(),
+    //       binding: NotasModuleBinding(),
+    // ),
   ];
 }

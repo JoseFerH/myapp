@@ -1,6 +1,7 @@
 // lib/app/modules/home/home_view.dart
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/controllers/notas_controller.dart';
 import '../../controllers/home_controller.dart';
 import 'components/bottom_nav_bar.dart';
 import '../../modules/calculadora/calculadora_view.dart';
@@ -24,6 +25,7 @@ import '../../data/services/cliente_service.dart';
 import '../../data/services/material_service.dart';
 import '../../data/services/venta_service.dart';
 import '../../data/services/estadisticas_service.dart';
+import '../../data/services/notas_service.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -43,6 +45,7 @@ class HomeView extends GetView<HomeController> {
       'Calculadora',
       'Carrito',
       'Estadísticas',
+      'Notas',
     ];
 
     return CupertinoPageScaffold(
@@ -52,7 +55,23 @@ class HomeView extends GetView<HomeController> {
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           child: const Icon(CupertinoIcons.doc_text_search, size: 22),
-          onPressed: () => Get.toNamed('/notas'),
+          onPressed: () async {
+            // Verificar que NotasService está registrado
+            if (!Get.isRegistered<NotasService>()) {
+              // Si no está registrado, registrarlo e inicializarlo
+              final service = Get.put(NotasService(), permanent: true);
+              await service.init(); // Esperamos a que se inicialice
+            } else {
+              // Asegurar que las notas estén cargadas
+              final service = Get.find<NotasService>();
+              if (service.notas.isEmpty) {
+                await service.cargarNotas();
+              }
+            }
+
+            // Navegar a la vista de notas
+            Get.toNamed('/notas');
+          },
         ),
         middle: Obx(() => Text(titles[controller.selectedIndex.value])),
         // Botón de configuración en la barra superior derecha
@@ -91,29 +110,38 @@ class HomeView extends GetView<HomeController> {
   }
 
   // Método para inicializar servicios
+  // Método para inicializar servicios en home_view.dart
   void _initServices() {
     if (!Get.isRegistered<CalculadoraService>()) {
-      Get.put(CalculadoraService().init(), permanent: true);
+      Get.put(CalculadoraService(), permanent: true);
     }
 
     if (!Get.isRegistered<CarritoService>()) {
-      Get.put(CarritoService().init(), permanent: true);
+      Get.put(CarritoService(), permanent: true);
     }
 
     if (!Get.isRegistered<ClienteService>()) {
-      Get.put(ClienteService().init(), permanent: true);
+      Get.put(ClienteService(), permanent: true);
     }
 
     if (!Get.isRegistered<MaterialService>()) {
-      Get.put(MaterialService().init(), permanent: true);
+      Get.put(MaterialService(), permanent: true);
     }
 
     if (!Get.isRegistered<VentaService>()) {
-      Get.put(VentaService().init(), permanent: true);
+      Get.put(VentaService(), permanent: true);
     }
 
     if (!Get.isRegistered<EstadisticasService>()) {
-      Get.put(EstadisticasService().init(), permanent: true);
+      Get.put(EstadisticasService(), permanent: true);
+    }
+
+    // Inicializar NotasService
+    if (!Get.isRegistered<NotasService>()) {
+      // Registrar primero, y luego inicializar de manera no bloqueante
+      final service = Get.put(NotasService(), permanent: true);
+      // La inicialización se hará sin bloquear
+      service.init(); // No usamos await
     }
   }
 

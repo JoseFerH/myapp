@@ -45,14 +45,14 @@ void main() async {
   }
 
   // Pre-register essential services
-  final calculadoraService = CalculadoraService();
-  final carritoService = CarritoService();
-  final clienteService = ClienteService();
-  final materialService = MaterialService();
-  final ventaService = VentaService();
+  final calculadoraService = await CalculadoraService().init();
+  final carritoService = await CarritoService().init();
+  final clienteService = await ClienteService().init();
+  final materialService = await MaterialService().init();
+  final ventaService = await VentaService().init();
   final pdfService = PDFService();
   final exportacionService = ExportacionService();
-  final estadisticasService = EstadisticasService();
+  final estadisticasService = await EstadisticasService().init();
 
   // Register all services with GetX
   Get.put(calculadoraService, permanent: true);
@@ -63,14 +63,6 @@ void main() async {
   Get.put(pdfService, permanent: true);
   Get.put(exportacionService, permanent: true);
   Get.put(estadisticasService, permanent: true);
-
-  // Initialize services that require initialization
-  calculadoraService.init();
-  carritoService.init();
-  clienteService.init();
-  materialService.init();
-  ventaService.init();
-  estadisticasService.init();
 
   runApp(
     GetCupertinoApp(

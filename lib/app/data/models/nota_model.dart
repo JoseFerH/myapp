@@ -1,5 +1,6 @@
 // lib/app/data/models/nota_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart' show Color;
 
 class NotaModel {
   String id;

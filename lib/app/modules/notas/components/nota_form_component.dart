@@ -1,4 +1,5 @@
 // lib/app/modules/notas/components/nota_form_component.dart
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../../controllers/notas_controller.dart';
@@ -6,26 +7,60 @@ import '../../../data/models/nota_model.dart';
 import 'selector_icono_component.dart';
 import 'selector_color_component.dart';
 
-class NotaFormComponent extends GetView<NotasController> {
+class NotaFormComponent extends StatefulWidget {
   final NotaModel? nota;
 
   const NotaFormComponent({Key? key, this.nota}) : super(key: key);
 
   @override
+  _NotaFormComponentState createState() => _NotaFormComponentState();
+}
+
+class _NotaFormComponentState extends State<NotaFormComponent> {
+  // Controladores para los campos
+  late TextEditingController tituloController;
+  late TextEditingController contenidoController;
+  late TextEditingController categoriaController;
+
+  // Variables reactivas locales
+  final iconoSeleccionado = RxString('');
+  final colorSeleccionado = Rx<Color>(const Color(0xFF9E9E9E));
+
+  // Controlador
+  late NotasController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Obtener el controlador
+    controller = Get.find<NotasController>();
+
+    // Inicializar controladores
+    tituloController = TextEditingController(text: widget.nota?.titulo ?? '');
+    contenidoController = TextEditingController(
+      text: widget.nota?.contenido ?? '',
+    );
+    categoriaController = TextEditingController(
+      text: widget.nota?.categoria ?? 'General',
+    );
+
+    // Inicializar variables reactivas
+    iconoSeleccionado.value = widget.nota?.icono ?? 'doc_text';
+    colorSeleccionado.value = widget.nota?.color ?? const Color(0xFF9E9E9E);
+  }
+
+  @override
+  void dispose() {
+    // Liberar recursos
+    tituloController.dispose();
+    contenidoController.dispose();
+    categoriaController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Controladores para los campos
-    final tituloController = TextEditingController(text: nota?.titulo ?? '');
-    final contenidoController = TextEditingController(
-      text: nota?.contenido ?? '',
-    );
-    final categoriaController = TextEditingController(
-      text: nota?.categoria ?? 'General',
-    );
-
-    // Variables reactivas locales
-    final iconoSeleccionado = RxString(nota?.icono ?? 'doc_text');
-    final colorSeleccionado = Rx<Color>(nota?.color ?? const Color(0xFF9E9E9E));
-
     return Column(
       children: [
         // Barra superior
@@ -35,7 +70,7 @@ class NotaFormComponent extends GetView<NotasController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                nota == null ? 'Nueva Nota' : 'Editar Nota',
+                widget.nota == null ? 'Nueva Nota' : 'Editar Nota',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -112,7 +147,7 @@ class NotaFormComponent extends GetView<NotasController> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              if (nota != null) ...[
+              if (widget.nota != null) ...[
                 // Botón Eliminar (solo en modo edición)
                 Expanded(
                   child: CupertinoButton(
@@ -131,16 +166,8 @@ class NotaFormComponent extends GetView<NotasController> {
                 child: CupertinoButton(
                   padding: const EdgeInsets.all(12),
                   color: CupertinoColors.activeBlue,
-                  child: Text(nota == null ? 'Crear' : 'Actualizar'),
-                  onPressed:
-                      () => _guardarNota(
-                        context,
-                        tituloController.text,
-                        contenidoController.text,
-                        categoriaController.text,
-                        iconoSeleccionado.value,
-                        colorSeleccionado.value,
-                      ),
+                  child: Text(widget.nota == null ? 'Crear' : 'Actualizar'),
+                  onPressed: () => _guardarNota(context),
                 ),
               ),
             ],
@@ -151,14 +178,14 @@ class NotaFormComponent extends GetView<NotasController> {
   }
 
   // Guardar nota
-  void _guardarNota(
-    BuildContext context,
-    String titulo,
-    String contenido,
-    String categoria,
-    String icono,
-    Color color,
-  ) {
+  void _guardarNota(BuildContext context) {
+    // Obtener valores de los controladores
+    final titulo = tituloController.text;
+    final contenido = contenidoController.text;
+    final categoria = categoriaController.text;
+    final icono = iconoSeleccionado.value;
+    final color = colorSeleccionado.value;
+
     // Validar datos
     if (titulo.isEmpty || contenido.isEmpty) {
       Get.snackbar(
@@ -172,7 +199,7 @@ class NotaFormComponent extends GetView<NotasController> {
     // Fecha actual
     final ahora = DateTime.now();
 
-    if (nota == null) {
+    if (widget.nota == null) {
       // Crear nueva nota
       final nuevaNota = NotaModel(
         titulo: titulo,
@@ -197,13 +224,13 @@ class NotaFormComponent extends GetView<NotasController> {
     } else {
       // Actualizar nota existente
       final notaActualizada = NotaModel(
-        id: nota!.id,
+        id: widget.nota!.id,
         titulo: titulo,
         contenido: contenido,
         icono: icono,
         categoria: categoria,
         color: color,
-        fechaCreacion: nota!.fechaCreacion,
+        fechaCreacion: widget.nota!.fechaCreacion,
         fechaModificacion: ahora,
       );
 
@@ -228,7 +255,7 @@ class NotaFormComponent extends GetView<NotasController> {
           (context) => CupertinoAlertDialog(
             title: const Text('Confirmar Eliminación'),
             content: Text(
-              '¿Está seguro que desea eliminar la nota "${nota!.titulo}"?',
+              '¿Está seguro que desea eliminar la nota "${widget.nota!.titulo}"?',
             ),
             actions: [
               CupertinoDialogAction(
@@ -241,7 +268,7 @@ class NotaFormComponent extends GetView<NotasController> {
                 onPressed: () {
                   Navigator.pop(context);
 
-                  controller.eliminarNota(nota!.id).then((success) {
+                  controller.eliminarNota(widget.nota!.id).then((success) {
                     if (success) {
                       Navigator.pop(context);
                       Get.snackbar(

@@ -33,6 +33,11 @@ class CalculadoraView extends GetView<CalculadoraController> {
       Get.put(CalculadoraController());
     }
 
+    // NUEVO CÓDIGO: Refrescar datos cuando se muestra la vista
+    // Future.delayed(Duration.zero, () {
+    //   Get.find<CalculadoraController>().refrescarDatos();
+    // });
+
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Calculadora de Precios'),

@@ -3,12 +3,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../../controllers/calculadora_controller.dart';
+import '../../../data/services/calculadora_service.dart';
 
 class CheckboxDesperdicioComponent extends GetView<CalculadoraController> {
   const CheckboxDesperdicioComponent({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // Acceder al servicio calculadora para obtener la configuración
+    final calculadoraService = Get.find<CalculadoraService>();
+
     return GetBuilder<CalculadoraController>(
       builder:
           (controller) => Container(
@@ -50,7 +54,10 @@ class CheckboxDesperdicioComponent extends GetView<CalculadoraController> {
 
                     const SizedBox(width: 8),
 
-                    const Text('5% de desperdicio'),
+                    // Mostrar el porcentaje configurado en lugar de un valor fijo
+                    Text(
+                      '${calculadoraService.configuracion.porcentajeDesperdicio.toStringAsFixed(1)}%',
+                    ),
                   ],
                 ),
 

@@ -1,6 +1,6 @@
 // lib/app/data/services/notas_service.dart
 import 'package:get/get.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../models/nota_model.dart';
 import '../providers/notas_provider.dart';
 
@@ -11,10 +11,15 @@ class NotasService extends GetxService {
   final RxBool cargando = false.obs;
   final RxString error = ''.obs;
 
-  // Rx Variable para lista de notas
+  // Rx Variable para lista de notas - inicializar como lista vacía
   final RxList<NotaModel> notas = <NotaModel>[].obs;
 
-  // Inicializar servicio
+  // Constructor sin inicialización asincrónica
+  NotasService() {
+    print("NotasService inicializado sincrónicamente");
+  }
+
+  // Método para cargar datos iniciales
   Future<NotasService> init() async {
     await cargarNotas();
     return this;

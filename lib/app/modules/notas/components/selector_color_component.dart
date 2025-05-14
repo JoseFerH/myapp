@@ -1,6 +1,7 @@
 // lib/app/modules/notas/components/selector_color_component.dart
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:flutter/material.dart' show Color, Colors;
 
 class SelectorColorComponent extends StatelessWidget {
   final Rx<Color> colorSeleccionado;

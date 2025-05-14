@@ -21,7 +21,7 @@ class NotaCardComponent extends StatelessWidget {
         case 'cliente':
           return CupertinoIcons.person;
         case 'proveedor':
-          return CupertinoIcons.building_2;
+          return CupertinoIcons.building_2_fill;
         case 'hoja':
           return CupertinoIcons.doc;
         case 'laminado':

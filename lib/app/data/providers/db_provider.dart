@@ -6,57 +6,60 @@ class DBProvider {
   static final DBProvider _instance = DBProvider._internal();
   factory DBProvider() => _instance;
   DBProvider._internal();
-  
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   // Referencias a colecciones principales
   CollectionReference get clientesRef => _firestore.collection('clientes');
-  CollectionReference get proveedoresRef => _firestore.collection('proveedores');
+  CollectionReference get proveedoresRef =>
+      _firestore.collection('proveedores');
   CollectionReference get materialesRef => _firestore.collection('materiales');
   CollectionReference get ventasRef => _firestore.collection('ventas');
-  CollectionReference get costosFijosRef => _firestore.collection('costosFijos');
-  CollectionReference get configuracionRef => _firestore.collection('configuracion');
-  
+  CollectionReference get costosFijosRef =>
+      _firestore.collection('costosFijos');
+  CollectionReference get configuracionRef =>
+      _firestore.collection('configuracion');
+  CollectionReference get notasRef => _firestore.collection('notas');
+
   // Inicializar configuración de Firestore
   // Inicializar configuración de Firestore
-Future<void> inicializarDB() async {
-  // Ya no intentamos configurar persistencia aquí, se hace en main.dart
-  
-  // Verificar que existe documento de configuración
-  try {
-    final configDoc = await configuracionRef.doc('config').get();
-    if (!configDoc.exists) {
-      // Crear configuración por defecto si no existe
-      await configuracionRef.doc('config').set({
-        'porcentajeGananciasMin': 50.0,
-        'porcentajeGananciasDefault': 50.0,
-        'precioDisenioEstandar': 0.0,
-        'precioDisenioPersonalizado': 50.0,
-        'costoEnvioNormal': 18.0,
-        'costoEnvioExpress': 30.0,
-        'aplicarDesperdicioDefault': true,
-        'porcentajeDesperdicio': 5.0,
-        'precioCuartoHoja': 20.0,
-        'precioMediaHoja': 15.0,
-        'precioRedesSociales': 90.0,
-        'precioMayorista': 10.0,
-        'cantidadMayorista': 100,
-      });
+  Future<void> inicializarDB() async {
+    // Ya no intentamos configurar persistencia aquí, se hace en main.dart
+
+    // Verificar que existe documento de configuración
+    try {
+      final configDoc = await configuracionRef.doc('config').get();
+      if (!configDoc.exists) {
+        // Crear configuración por defecto si no existe
+        await configuracionRef.doc('config').set({
+          'porcentajeGananciasMin': 50.0,
+          'porcentajeGananciasDefault': 50.0,
+          'precioDisenioEstandar': 0.0,
+          'precioDisenioPersonalizado': 50.0,
+          'costoEnvioNormal': 18.0,
+          'costoEnvioExpress': 30.0,
+          'aplicarDesperdicioDefault': true,
+          'porcentajeDesperdicio': 5.0,
+          'precioCuartoHoja': 20.0,
+          'precioMediaHoja': 15.0,
+          'precioRedesSociales': 90.0,
+          'precioMayorista': 10.0,
+          'cantidadMayorista': 100,
+        });
+      }
+
+      // Verificar si existen costos fijos predeterminados
+      final costosFijos = await costosFijosRef.limit(1).get();
+      if (costosFijos.docs.isEmpty) {
+        // Crear costos fijos predeterminados
+        await _crearCostosFijosPredeterminados();
+      }
+    } catch (e) {
+      print('Error inicializando DB: $e');
+      rethrow;
     }
-    
-    // Verificar si existen costos fijos predeterminados
-    final costosFijos = await costosFijosRef.limit(1).get();
-    if (costosFijos.docs.isEmpty) {
-      // Crear costos fijos predeterminados
-      await _crearCostosFijosPredeterminados();
-    }
-    
-  } catch (e) {
-    print('Error inicializando DB: $e');
-    rethrow;
   }
-}
-  
+
   // Crear costos fijos predeterminados
   Future<void> _crearCostosFijosPredeterminados() async {
     final costosFijos = [
@@ -97,16 +100,16 @@ Future<void> inicializarDB() async {
         'activo': true,
       },
     ];
-    
+
     WriteBatch batch = _firestore.batch();
     for (var costo in costosFijos) {
       DocumentReference docRef = costosFijosRef.doc();
       batch.set(docRef, costo);
     }
-    
+
     await batch.commit();
   }
-  
+
   // Método para generar un ID único para documentos
   String generarId() {
     return _firestore.collection('_').doc().id;

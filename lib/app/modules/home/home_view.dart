@@ -1,3 +1,4 @@
+// lib/app/modules/home/home_view.dart
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../controllers/home_controller.dart';
@@ -47,8 +48,14 @@ class HomeView extends GetView<HomeController> {
     return CupertinoPageScaffold(
       // AppBar dinámico que cambia según la pestaña seleccionada
       navigationBar: CupertinoNavigationBar(
+        // Botón de notas en la barra superior izquierda
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.doc_text_search, size: 22),
+          onPressed: () => Get.toNamed('/notas'),
+        ),
         middle: Obx(() => Text(titles[controller.selectedIndex.value])),
-        // Botón de configuración en la barra superior
+        // Botón de configuración en la barra superior derecha
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           child: const Icon(CupertinoIcons.settings, size: 22),

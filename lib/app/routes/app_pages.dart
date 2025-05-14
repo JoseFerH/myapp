@@ -22,6 +22,8 @@ import '../modules/registros/views/clientes_view.dart';
 import '../modules/registros/views/proveedores_view.dart';
 import '../modules/registros/views/inventario_view.dart';
 import '../modules/visualizacion/visualizacion_view.dart';
+import '../bindings/notas_binding.dart';
+import '../modules/notas/notas_view.dart';
 
 // Importación de las rutas
 import 'app_routes.dart';
@@ -93,9 +95,14 @@ class AppPages {
           page: () => const ConfiguracionView(),
           binding: ConfiguracionBinding(),
         ),
+        GetPage(
+          name: AppRoutes.NOTAS,
+          page: () => const NotasView(),
+          binding: NotasBinding(),
+        ),
       ],
     ),
-    
+
     // Rutas directas (sin necesidad de estar anidadas) para navegación más sencilla
     GetPage(
       name: AppRoutes.CALCULADORA,

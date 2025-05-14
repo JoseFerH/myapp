@@ -39,13 +39,23 @@ class HomeView extends GetView<HomeController> {
     _initControllers();
 
     // Lista de títulos para cada vista
+    // final titles = [
+    //   'Registros',
+    //   'Visualización',
+    //   'Calculadora',
+    //   'Carrito',
+    //   'Estadísticas',
+    //   'Notas',
+    // ];
+
+    // Lista de títulos para cada vista
     final titles = [
-      'Registros',
-      'Visualización',
-      'Calculadora',
-      'Carrito',
-      'Estadísticas',
-      'Notas',
+      'PRUEBA 1',
+      'PRUEBA 2',
+      'PRUEBA 3',
+      'PRUEBA 4',
+      'PRUEBA 5',
+      'PRUEBA 6',
     ];
 
     return CupertinoPageScaffold(
@@ -94,9 +104,9 @@ class HomeView extends GetView<HomeController> {
                 onPageChanged: controller.changeIndex,
                 children: [
                   const RegistrosView(),
-                  const VisualizacionView(),
                   const CalculadoraView(),
                   const CarritoView(),
+                  const VisualizacionView(),
                   const EstadisticasView(),
                 ],
               ),

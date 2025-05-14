@@ -252,7 +252,7 @@ class _NotaFormComponentState extends State<NotaFormComponent> {
     showCupertinoDialog(
       context: context,
       builder:
-          (context) => CupertinoAlertDialog(
+          (dialogContext) => CupertinoAlertDialog(
             title: const Text('Confirmar Eliminación'),
             content: Text(
               '¿Está seguro que desea eliminar la nota "${widget.nota!.titulo}"?',
@@ -260,20 +260,28 @@ class _NotaFormComponentState extends State<NotaFormComponent> {
             actions: [
               CupertinoDialogAction(
                 child: const Text('Cancelar'),
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(dialogContext),
               ),
               CupertinoDialogAction(
                 isDestructiveAction: true,
                 child: const Text('Eliminar'),
                 onPressed: () {
-                  Navigator.pop(context);
+                  // Cerrar diálogo de confirmación
+                  Navigator.pop(dialogContext);
 
                   controller.eliminarNota(widget.nota!.id).then((success) {
                     if (success) {
+                      // Cerrar formulario
                       Navigator.pop(context);
                       Get.snackbar(
                         'Éxito',
                         'Nota eliminada correctamente',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    } else {
+                      Get.snackbar(
+                        'Error',
+                        'No se pudo eliminar la nota',
                         snackPosition: SnackPosition.BOTTOM,
                       );
                     }

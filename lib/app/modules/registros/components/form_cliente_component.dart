@@ -7,20 +7,24 @@ import '../../../data/models/cliente_model.dart';
 
 class FormClienteComponent extends GetView<RegistrosController> {
   final ClienteModel? cliente;
-  
+
   const FormClienteComponent({Key? key, this.cliente}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // Controladores para los campos del formulario
     final nombreController = TextEditingController(text: cliente?.nombre ?? '');
-    final direccionController = TextEditingController(text: cliente?.direccion ?? '');
+    final direccionController = TextEditingController(
+      text: cliente?.direccion ?? '',
+    );
     final zonaController = TextEditingController(text: cliente?.zona ?? '');
-    final tipoClienteController = TextEditingController(text: cliente?.tipoCliente ?? 'Regular');
-    
+    final tipoClienteController = TextEditingController(
+      text: cliente?.tipoCliente ?? 'Regular',
+    );
+
     // Tipo de cliente seleccionado (estado local)
     String tipoCliente = cliente?.tipoCliente ?? 'Regular';
-    
+
     return Column(
       children: [
         // Barra superior
@@ -44,7 +48,7 @@ class FormClienteComponent extends GetView<RegistrosController> {
             ],
           ),
         ),
-        
+
         // Contenido del formulario
         Expanded(
           child: SingleChildScrollView(
@@ -59,9 +63,9 @@ class FormClienteComponent extends GetView<RegistrosController> {
                   placeholder: 'Nombre completo',
                   padding: const EdgeInsets.all(12),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 const Text('Dirección'),
                 const SizedBox(height: 8),
                 CupertinoTextField(
@@ -69,9 +73,9 @@ class FormClienteComponent extends GetView<RegistrosController> {
                   placeholder: 'Dirección completa',
                   padding: const EdgeInsets.all(12),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 const Text('Zona'),
                 const SizedBox(height: 8),
                 CupertinoTextField(
@@ -79,12 +83,12 @@ class FormClienteComponent extends GetView<RegistrosController> {
                   placeholder: 'Zona (ej: Zona 10)',
                   padding: const EdgeInsets.all(12),
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 const Text('Tipo de Cliente'),
                 const SizedBox(height: 8),
-                
+
                 // Selector de tipo de cliente usando StatefulBuilder para manejar el estado local
                 StatefulBuilder(
                   builder: (context, setState) {
@@ -109,15 +113,15 @@ class FormClienteComponent extends GetView<RegistrosController> {
                         tipoClienteController.text = value;
                       },
                     );
-                  }
+                  },
                 ),
-                
+
                 const SizedBox(height: 32),
               ],
             ),
           ),
         ),
-        
+
         // Botones de acción
         Padding(
           padding: const EdgeInsets.all(16.0),
@@ -133,23 +137,24 @@ class FormClienteComponent extends GetView<RegistrosController> {
                     onPressed: () => _confirmarEliminar(context),
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
               ],
-              
+
               // Botón Guardar
               Expanded(
                 child: CupertinoButton(
                   padding: const EdgeInsets.all(12),
                   color: CupertinoColors.activeBlue,
                   child: Text(cliente == null ? 'Crear' : 'Actualizar'),
-                  onPressed: () => _guardarCliente(
-                    context,
-                    nombreController.text,
-                    direccionController.text,
-                    zonaController.text,
-                    tipoCliente,
-                  ),
+                  onPressed:
+                      () => _guardarCliente(
+                        context,
+                        nombreController.text,
+                        direccionController.text,
+                        zonaController.text,
+                        tipoCliente,
+                      ),
                 ),
               ),
             ],
@@ -158,7 +163,7 @@ class FormClienteComponent extends GetView<RegistrosController> {
       ],
     );
   }
-  
+
   // Guardar cliente (crear nuevo o actualizar existente)
   void _guardarCliente(
     BuildContext context,
@@ -176,10 +181,10 @@ class FormClienteComponent extends GetView<RegistrosController> {
       );
       return;
     }
-    
+
     // Crear objeto de cliente
     ClienteModel nuevoCliente;
-    
+
     if (cliente == null) {
       // Crear nuevo cliente
       nuevoCliente = ClienteModel(
@@ -188,7 +193,7 @@ class FormClienteComponent extends GetView<RegistrosController> {
         zona: zona,
         tipoCliente: tipoCliente,
       );
-      
+
       controller.crearCliente(nuevoCliente).then((success) {
         if (success) {
           Navigator.pop(context);
@@ -207,7 +212,7 @@ class FormClienteComponent extends GetView<RegistrosController> {
         zona: zona,
         tipoCliente: tipoCliente,
       );
-      
+
       controller.actualizarCliente(nuevoCliente).then((success) {
         if (success) {
           Navigator.pop(context);
@@ -220,39 +225,48 @@ class FormClienteComponent extends GetView<RegistrosController> {
       });
     }
   }
-  
+
   // Confirmar eliminación de cliente
   void _confirmarEliminar(BuildContext context) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Confirmar Eliminación'),
-        content: Text('¿Está seguro que desea eliminar al cliente "${cliente!.nombre}"?'),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.pop(context),
+      builder:
+          (context) => CupertinoAlertDialog(
+            title: const Text('Confirmar Eliminación'),
+            content: Text(
+              '¿Está seguro que desea eliminar al cliente "${cliente!.nombre}"?',
+            ),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('Cancelar'),
+                onPressed: () => Navigator.pop(context),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                child: const Text('Eliminar'),
+                onPressed: () {
+                  Navigator.pop(context); // Cerrar el diálogo
+
+                  controller.eliminarCliente(cliente!.id).then((success) {
+                    if (success) {
+                      Navigator.pop(context); // Cerrar el formulario
+                      Get.snackbar(
+                        'Éxito',
+                        'Cliente eliminado correctamente',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    } else {
+                      Get.snackbar(
+                        'Error',
+                        controller.error.value,
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    }
+                  });
+                },
+              ),
+            ],
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: const Text('Eliminar'),
-            onPressed: () {
-              Navigator.pop(context); // Cerrar el diálogo
-              
-              controller.eliminarCliente(cliente!.id).then((success) {
-                if (success) {
-                  Navigator.pop(context); // Cerrar el formulario
-                  Get.snackbar(
-                    'Éxito',
-                    'Cliente eliminado correctamente',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                }
-              });
-            },
-          ),
-        ],
-      ),
     );
   }
 }

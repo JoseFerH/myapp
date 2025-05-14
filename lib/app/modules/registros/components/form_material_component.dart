@@ -917,6 +917,12 @@ class _FormMaterialComponentState extends State<FormMaterialComponent> {
                         'Material eliminado correctamente',
                         snackPosition: SnackPosition.BOTTOM,
                       );
+                    } else {
+                      Get.snackbar(
+                        'Error',
+                        controller.error.value,
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
                     }
                   });
                 },

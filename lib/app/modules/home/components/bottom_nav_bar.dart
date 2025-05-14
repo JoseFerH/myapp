@@ -15,10 +15,7 @@ class BottomNavBar extends GetView<HomeController> {
         icon: Icon(CupertinoIcons.person_2),
         label: 'Registros',
       ),
-      const BottomNavigationBarItem(
-        icon: Icon(CupertinoIcons.table),
-        label: 'Visualización',
-      ),
+
       const BottomNavigationBarItem(
         icon: Icon(CupertinoIcons.money_dollar_circle),
         label: 'Calculadora',
@@ -26,6 +23,10 @@ class BottomNavBar extends GetView<HomeController> {
       const BottomNavigationBarItem(
         icon: Icon(CupertinoIcons.cart),
         label: 'Carrito',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(CupertinoIcons.table),
+        label: 'Visualización',
       ),
       const BottomNavigationBarItem(
         icon: Icon(CupertinoIcons.graph_circle),
@@ -41,10 +42,7 @@ class BottomNavBar extends GetView<HomeController> {
         activeColor: const Color(0xFF007AFF), // Color azul iOS
         inactiveColor: CupertinoColors.systemGrey,
         border: const Border(
-          top: BorderSide(
-            color: CupertinoColors.systemGrey4,
-            width: 0.5,
-          ),
+          top: BorderSide(color: CupertinoColors.systemGrey4, width: 0.5),
         ),
       ),
     );

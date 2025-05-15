@@ -7,6 +7,8 @@ import '../models/configuracion_model.dart';
 import '../models/item_venta_model.dart';
 import '../providers/materiales_provider.dart';
 import '../providers/configuracion_provider.dart';
+import '../models/proyecto_model.dart';
+import '../providers/proyectos_provider.dart';
 
 class CalculadoraService extends GetxService {
   final MaterialesProvider _materialesProvider = MaterialesProvider();
@@ -32,6 +34,9 @@ class CalculadoraService extends GetxService {
   final RxDouble ganancia = 0.0.obs;
   final RxDouble precioUnitario = 0.0.obs;
   final RxDouble precioTotal = 0.0.obs;
+  final ProyectosProvider _proyectosProvider = ProyectosProvider();
+  final Rx<ProyectoModel?> proyectoSeleccionado = Rx<ProyectoModel?>(null);
+  RxList<ProyectoModel> proyectos = <ProyectoModel>[].obs;
 
   // Configuración global
   late ConfiguracionModel configuracion;
@@ -59,6 +64,7 @@ class CalculadoraService extends GetxService {
 
       // Cargar materiales disponibles
       await cargarMateriales();
+      await cargarProyectos();
 
       // Inicializar valores por defecto
       aplicarDesperdicio.value = configuracion.aplicarDesperdicioDefault;
@@ -70,6 +76,23 @@ class CalculadoraService extends GetxService {
       return this;
     } finally {
       cargando.value = false;
+    }
+  }
+
+  // Añadir método para cargar proyectos
+  Future<void> cargarProyectos() async {
+    try {
+      List<ProyectoModel> listaProyectos =
+          await _proyectosProvider.obtenerProyectos();
+      proyectos.assignAll(listaProyectos.where((proyecto) => proyecto.activo));
+
+      // Seleccionar el primer proyecto por defecto
+      if (proyectos.isNotEmpty && proyectoSeleccionado.value == null) {
+        proyectoSeleccionado.value = proyectos.first;
+      }
+    } catch (e) {
+      error.value = 'Error al cargar proyectos: $e';
+      print(error.value);
     }
   }
 
@@ -227,6 +250,11 @@ class CalculadoraService extends GetxService {
     return total;
   }
 
+  void seleccionarProyecto(ProyectoModel proyecto) {
+    proyectoSeleccionado.value = proyecto;
+    calcularPrecio();
+  }
+
   // Aplicar reglas especiales de precios
   void _aplicarReglasEspeciales() {
     // Eliminar la regla 1 que establecía precios fijos por tamaño
@@ -266,6 +294,8 @@ class CalculadoraService extends GetxService {
       cantidad: cantidad.value,
       precioUnitario: precioUnitario.value,
       precioTotal: precioTotal.value,
+      proyectoId: proyectoSeleccionado.value?.id ?? '',
+      nombreProyecto: proyectoSeleccionado.value?.nombre ?? '',
     );
   }
 

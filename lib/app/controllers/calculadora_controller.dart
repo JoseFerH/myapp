@@ -8,6 +8,7 @@ import '../data/services/calculadora_service.dart';
 import '../data/services/carrito_service.dart';
 import '../data/services/cliente_service.dart';
 import '../data/models/cliente_model.dart';
+import '../data/models/proyecto_model.dart';
 
 class CalculadoraController extends GetxController {
   // Servicios
@@ -46,13 +47,40 @@ class CalculadoraController extends GetxController {
   final Rx<ClienteModel?> clienteSeleccionado = Rx<ClienteModel?>(null);
   final RxList<ClienteModel> clientes = <ClienteModel>[].obs;
   final RxList<ClienteModel> clientesFiltrados = <ClienteModel>[].obs;
+  RxList<ProyectoModel> get proyectos => _calculadoraService.proyectos;
+  Rx<ProyectoModel?> get proyectoSeleccionado =>
+      _calculadoraService.proyectoSeleccionado;
+
+  // Añadir este método para seleccionar un proyecto
+  void seleccionarProyecto(ProyectoModel proyecto) {
+    _calculadoraService.seleccionarProyecto(proyecto);
+    update(); // Notifica a GetBuilder para actualizarse
+  }
 
   @override
   void onInit() {
     super.onInit();
     cargarClientes();
     print("CalculadoraController: onInit iniciado");
+    _cargarDatos();
     _inicializar();
+  }
+
+  Future<void> _cargarDatos() async {
+    cargando.value = true;
+    try {
+      // Código existente para cargar otros datos...
+
+      // Cargar proyectos
+      await _calculadoraService.cargarProyectos();
+
+      // Calcular precio con los datos iniciales
+      calcularPrecio();
+    } catch (e) {
+      error.value = 'Error al cargar datos: $e';
+    } finally {
+      cargando.value = false;
+    }
   }
 
   // Añade este método al CalculadoraController si no existe o está comentado
@@ -66,6 +94,7 @@ class CalculadoraController extends GetxController {
 
       // Actualizar datos en el servicio
       await calculadoraService.actualizarDatos();
+      await _calculadoraService.cargarProyectos();
 
       // Actualizar valores en el controlador
       hojaSeleccionada.value = calculadoraService.hojaSeleccionada.value;

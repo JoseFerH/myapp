@@ -20,6 +20,7 @@ class DBProvider {
   CollectionReference get configuracionRef =>
       _firestore.collection('configuracion');
   CollectionReference get notasRef => _firestore.collection('notas');
+  CollectionReference get proyectosRef => _firestore.collection('proyectos');
 
   // Inicializar configuración de Firestore
   Future<void> inicializarDB() async {
@@ -27,6 +28,12 @@ class DBProvider {
 
     // Verificar que existe documento de configuración
     try {
+      print("DBProvider: Verificando proyectos");
+      final proyectos = await proyectosRef.limit(1).get();
+      if (proyectos.docs.isEmpty) {
+        print("DBProvider: Creando proyectos predeterminados");
+        await _crearProyectosPredeterminados();
+      }
       final configDoc = await configuracionRef.doc('config').get();
       print("DBProvider: Verificando configuración");
 
@@ -73,6 +80,39 @@ class DBProvider {
       print('Error inicializando DB: $e');
       rethrow;
     }
+  }
+
+  Future<void> _crearProyectosPredeterminados() async {
+    final proyectosPredeterminados = [
+      {
+        'nombre': 'Personal',
+        'descripcion': 'Proyectos para uso personal',
+        'activo': true,
+      },
+      {
+        'nombre': 'Redes Sociales',
+        'descripcion': 'Proyectos para publicar en redes sociales',
+        'activo': true,
+      },
+      {
+        'nombre': 'Decoración',
+        'descripcion': 'Proyectos para decoración de espacios',
+        'activo': true,
+      },
+      {
+        'nombre': 'Regalo',
+        'descripcion': 'Proyectos para regalar',
+        'activo': true,
+      },
+    ];
+
+    WriteBatch batch = _firestore.batch();
+    for (var proyecto in proyectosPredeterminados) {
+      DocumentReference docRef = proyectosRef.doc();
+      batch.set(docRef, proyecto);
+    }
+
+    await batch.commit();
   }
 
   // Crear costos fijos predeterminados

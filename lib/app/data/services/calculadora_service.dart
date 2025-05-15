@@ -229,14 +229,8 @@ class CalculadoraService extends GetxService {
 
   // Aplicar reglas especiales de precios
   void _aplicarReglasEspeciales() {
-    // Regla 1: 1/4 De hoja a Q20, 1/2 Hoja en adelante a Q15 c/u
-    if (tamanoSeleccionado.value == TamanoSticker.cuarto) {
-      precioUnitario.value = configuracion.precioCuartoHoja;
-    } else if (tamanoSeleccionado.value == TamanoSticker.medio ||
-        tamanoSeleccionado.value == TamanoSticker.tresQuartos ||
-        tamanoSeleccionado.value == TamanoSticker.completo) {
-      precioUnitario.value = configuracion.precioMediaHoja;
-    }
+    // Eliminar la regla 1 que establecía precios fijos por tamaño
+    // Regla 1: ELIMINADA - Ya no aplicamos precios fijos según el tamaño
 
     // Regla 2: A partir de 100 1/4 de Hoja, cada 1/4 de Hoja costará Q10 Con diseño Incluido
     if (tamanoSeleccionado.value == TamanoSticker.cuarto &&

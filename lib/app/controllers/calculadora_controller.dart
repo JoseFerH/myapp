@@ -4,6 +4,10 @@ import '../data/services/carrito_service.dart';
 import '../data/models/hoja_model.dart';
 import '../data/models/laminado_model.dart';
 import '../data/models/item_venta_model.dart';
+import '../data/services/calculadora_service.dart';
+import '../data/services/carrito_service.dart';
+import '../data/services/cliente_service.dart';
+import '../data/models/cliente_model.dart';
 
 class CalculadoraController extends GetxController {
   // Servicios
@@ -35,11 +39,104 @@ class CalculadoraController extends GetxController {
   final hojas = <HojaModel>[].obs;
   final laminados = <LaminadoModel>[].obs;
 
+  final CalculadoraService calculadoraService = Get.find<CalculadoraService>();
+  final CarritoService carritoService = Get.find<CarritoService>();
+
+  // Propiedades para manejar la selección de cliente
+  final Rx<ClienteModel?> clienteSeleccionado = Rx<ClienteModel?>(null);
+  final RxList<ClienteModel> clientes = <ClienteModel>[].obs;
+  final RxList<ClienteModel> clientesFiltrados = <ClienteModel>[].obs;
+
   @override
   void onInit() {
     super.onInit();
+    cargarClientes();
     print("CalculadoraController: onInit iniciado");
     _inicializar();
+  }
+
+  // Añade este método al CalculadoraController si no existe o está comentado
+  Future<void> refrescarDatos() async {
+    try {
+      cargando.value = true;
+      error.value = '';
+
+      // Obtener el servicio de calculadora
+      final calculadoraService = Get.find<CalculadoraService>();
+
+      // Actualizar datos en el servicio
+      await calculadoraService.actualizarDatos();
+
+      // Actualizar valores en el controlador
+      hojaSeleccionada.value = calculadoraService.hojaSeleccionada.value;
+      laminadoSeleccionada.value =
+          calculadoraService.laminadoSeleccionada.value;
+      tamanoSeleccionado.value = calculadoraService.tamanoSeleccionado.value;
+      tipoDiseno.value = calculadoraService.tipoDiseno.value;
+      precioDiseno.value = calculadoraService.precioDiseno.value;
+      aplicarDesperdicio.value = calculadoraService.aplicarDesperdicio.value;
+      cantidad.value = calculadoraService.cantidad.value;
+
+      // Recalcular precios
+      calcularPrecio();
+
+      update(); // Actualizar la UI
+
+      return Future.value();
+    } catch (e) {
+      error.value = 'Error al actualizar datos: $e';
+      print(error.value);
+      return Future.error(error.value);
+    } finally {
+      cargando.value = false;
+    }
+  }
+
+  // Añadir estos métodos nuevos
+  Future<void> cargarClientes() async {
+    try {
+      // Usar el servicio de clientes para cargar la lista
+      final clienteService = Get.find<ClienteService>();
+      await clienteService.cargarClientes();
+      clientes.assignAll(clienteService.clientes);
+      clientesFiltrados.assignAll(clientes);
+
+      // Verificar si hay un cliente seleccionado en el carrito
+      final carritoService = Get.find<CarritoService>();
+      if (carritoService.clienteSeleccionado.value != null &&
+          clienteSeleccionado.value == null) {
+        clienteSeleccionado.value = carritoService.clienteSeleccionado.value;
+      }
+    } catch (e) {
+      print('Error al cargar clientes: $e');
+    }
+  }
+
+  void seleccionarCliente(ClienteModel cliente) {
+    clienteSeleccionado.value = cliente;
+
+    // Sincronizar con el carrito
+    final carritoService = Get.find<CarritoService>();
+    carritoService.seleccionarCliente(cliente);
+  }
+
+  void filtrarClientes(String query) {
+    if (query.isEmpty) {
+      clientesFiltrados.assignAll(clientes);
+    } else {
+      clientesFiltrados.assignAll(
+        clientes
+            .where(
+              (cliente) =>
+                  cliente.nombre.toLowerCase().contains(query.toLowerCase()) ||
+                  cliente.zona.toLowerCase().contains(query.toLowerCase()) ||
+                  cliente.tipoCliente.toLowerCase().contains(
+                    query.toLowerCase(),
+                  ),
+            )
+            .toList(),
+      );
+    }
   }
 
   // Método de inicialización
@@ -212,13 +309,33 @@ class CalculadoraController extends GetxController {
   }
 
   void agregarAlCarrito() {
+    if (hojaSeleccionada.value == null || laminadoSeleccionada.value == null) {
+      Get.snackbar(
+        'Error',
+        'Seleccione los materiales',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (clienteSeleccionado.value == null) {
+      Get.snackbar(
+        'Error',
+        'Seleccione un cliente primero',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     try {
-      print("CalculadoraController: Agregando al carrito");
-      // Crear item de venta desde el servicio
-      ItemVentaModel item = _calculadoraService.crearItemVenta();
+      // Crear ítem de venta desde los datos actuales
+      ItemVentaModel item = calculadoraService.crearItemVenta();
 
       // Agregar al carrito
-      _carritoService.agregarItem(item);
+      carritoService.agregarItem(item);
+
+      // Ya no es necesario seleccionar cliente en el carrito porque
+      // ya lo hemos sincronizado antes
 
       // Mostrar mensaje de éxito
       Get.snackbar(
@@ -226,12 +343,14 @@ class CalculadoraController extends GetxController {
         'Producto agregado al carrito',
         snackPosition: SnackPosition.BOTTOM,
       );
-    } catch (e) {
-      error.value = 'Error al agregar al carrito: $e';
-      print("CalculadoraController ERROR: ${error.value}");
 
-      // Mostrar mensaje de error
-      Get.snackbar('Error', error.value, snackPosition: SnackPosition.BOTTOM);
+      // Resetear calculadora para nuevo cálculo
+      resetear();
+
+      // Navegar al carrito (opcional, podemos mantenerlo o quitarlo)
+      // Get.find<HomeController>().changeIndex(3);
+    } catch (e) {
+      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
     }
   }
 }

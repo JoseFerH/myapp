@@ -233,14 +233,22 @@ class PreviewCalculoComponent extends GetView<CalculadoraController> {
                 }),
 
                 // Indicador de regla especial aplicada
+                // Indicador de regla especial aplicada
                 Obx(() {
+                  // Ahora solo verificamos la regla de mayorista
                   final calculado =
                       controller.subtotal.value + controller.ganancia.value;
-                  if (calculado != controller.precioUnitario.value) {
+                  // La regla de mayorista es la única que puede hacer que el precio calculado
+                  // sea diferente al precio unitario final
+                  if (calculado != controller.precioUnitario.value &&
+                      controller.tamanoSeleccionado.value ==
+                          TamanoSticker.cuarto &&
+                      controller.cantidad.value >=
+                          calculadoraService.configuracion.cantidadMayorista) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        '* Se aplicó una regla especial de precios',
+                        '* Se aplicó precio especial para compras mayoristas',
                         style: TextStyle(
                           fontStyle: FontStyle.italic,
                           fontSize: 12,

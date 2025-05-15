@@ -33,11 +33,6 @@ class CalculadoraView extends GetView<CalculadoraController> {
       Get.put(CalculadoraController());
     }
 
-    // NUEVO CÓDIGO: Refrescar datos cuando se muestra la vista
-    // Future.delayed(Duration.zero, () {
-    //   Get.find<CalculadoraController>().refrescarDatos();
-    // });
-
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Calculadora de Precios'),
@@ -57,71 +52,85 @@ class CalculadoraView extends GetView<CalculadoraController> {
             );
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Selectores de material
-                const SelectorMaterialComponent(),
+          // CustomScrollView con soporte para pull-to-refresh
+          return CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // Control de actualización estilo iOS
+              CupertinoSliverRefreshControl(
+                onRefresh: () => controller.refrescarDatos(),
+              ),
 
-                const SizedBox(height: 20),
+              // Contenido principal
+              SliverPadding(
+                padding: const EdgeInsets.all(16.0),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Selectores de material
+                      const SelectorMaterialComponent(),
 
-                // Selector de tamaño
-                const SelectorTamanoComponent(),
+                      const SizedBox(height: 20),
 
-                const SizedBox(height: 20),
+                      // Selector de tamaño
+                      const SelectorTamanoComponent(),
 
-                // Selector de diseño
-                const SelectorDisenoComponent(),
+                      const SizedBox(height: 20),
 
-                const SizedBox(height: 20),
+                      // Selector de diseño
+                      const SelectorDisenoComponent(),
 
-                // Opciones adicionales
-                Row(
-                  children: [
-                    // Checkbox desperdicio
-                    const Expanded(child: CheckboxDesperdicioComponent()),
+                      const SizedBox(height: 20),
 
-                    const SizedBox(width: 16),
+                      // Opciones adicionales
+                      Row(
+                        children: [
+                          // Checkbox desperdicio
+                          const Expanded(child: CheckboxDesperdicioComponent()),
 
-                    // Input cantidad
-                    const Expanded(child: InputCantidadComponent()),
-                  ],
-                ),
+                          const SizedBox(width: 16),
 
-                const SizedBox(height: 30),
-
-                // Vista previa del cálculo
-                PreviewCalculoComponent(),
-
-                const SizedBox(height: 20),
-
-                // Botones de acción
-                Row(
-                  children: [
-                    // Botón Resetear
-                    Expanded(
-                      child: CustomButton(
-                        text: 'Resetear',
-                        isSecondary: true,
-                        onPressed: controller.resetear,
+                          // Input cantidad
+                          const Expanded(child: InputCantidadComponent()),
+                        ],
                       ),
-                    ),
 
-                    const SizedBox(width: 16),
+                      const SizedBox(height: 30),
 
-                    // Botón Agregar al Carrito
-                    Expanded(
-                      child: CustomButton(
-                        text: 'Agregar al Carrito',
-                        onPressed: controller.agregarAlCarrito,
+                      // Vista previa del cálculo
+                      PreviewCalculoComponent(),
+
+                      const SizedBox(height: 20),
+
+                      // Botones de acción
+                      Row(
+                        children: [
+                          // Botón Resetear
+                          Expanded(
+                            child: CustomButton(
+                              text: 'Resetear',
+                              isSecondary: true,
+                              onPressed: controller.resetear,
+                            ),
+                          ),
+
+                          const SizedBox(width: 16),
+
+                          // Botón Agregar al Carrito
+                          Expanded(
+                            child: CustomButton(
+                              text: 'Agregar al Carrito',
+                              onPressed: controller.agregarAlCarrito,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         }),
       ),

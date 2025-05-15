@@ -1,324 +1,155 @@
 import 'package:get/get.dart';
-import '../data/services/calculadora_service.dart';
-import '../data/services/carrito_service.dart';
 import '../data/models/hoja_model.dart';
 import '../data/models/laminado_model.dart';
 import '../data/models/item_venta_model.dart';
-import '../data/services/calculadora_service.dart';
-import '../data/services/carrito_service.dart';
-import '../data/services/cliente_service.dart';
 import '../data/models/cliente_model.dart';
 import '../data/models/proyecto_model.dart';
+import '../data/services/calculadora_service.dart';
+import '../data/services/cliente_service.dart';
+import '../data/services/carrito_service.dart';
 
 class CalculadoraController extends GetxController {
-  // Servicios
   final CalculadoraService _calculadoraService = Get.find<CalculadoraService>();
+  final ClienteService _clienteService = Get.find<ClienteService>();
   final CarritoService _carritoService = Get.find<CarritoService>();
 
-  // Variables reactivas para el estado
-  final cargando = false.obs;
-  final error = ''.obs;
-
-  // Variables reactivas para los materiales
-  final hojaSeleccionada = Rx<HojaModel?>(null);
-  final laminadoSeleccionada = Rx<LaminadoModel?>(null);
-  final tamanoSeleccionado = TamanoSticker.cuarto.obs;
-  final tipoDiseno = TipoDiseno.estandar.obs;
-  final precioDiseno = 0.0.obs;
-  final aplicarDesperdicio = true.obs;
-  final cantidad = 1.obs;
-
-  // Variables reactivas para mostrar resultados
-  final costoMateriales = 0.0.obs;
-  final costosFijos = 0.0.obs;
-  final subtotal = 0.0.obs;
-  final ganancia = 0.0.obs;
-  final precioUnitario = 0.0.obs;
-  final precioTotal = 0.0.obs;
-
-  // Listas de materiales
-  final hojas = <HojaModel>[].obs;
-  final laminados = <LaminadoModel>[].obs;
-
-  final CalculadoraService calculadoraService = Get.find<CalculadoraService>();
-  final CarritoService carritoService = Get.find<CarritoService>();
-
-  // Propiedades para manejar la selección de cliente
-  final Rx<ClienteModel?> clienteSeleccionado = Rx<ClienteModel?>(null);
-  final RxList<ClienteModel> clientes = <ClienteModel>[].obs;
-  final RxList<ClienteModel> clientesFiltrados = <ClienteModel>[].obs;
+  // Getters para acceder a las propiedades del servicio
+  RxList<HojaModel> get hojas => _calculadoraService.hojas;
+  RxList<LaminadoModel> get laminados => _calculadoraService.laminados;
+  RxList<HojaModel> get hojasSeleccionadas =>
+      _calculadoraService.hojasSeleccionadas;
+  RxList<LaminadoModel> get laminadosSeleccionados =>
+      _calculadoraService.laminadosSeleccionados;
+  RxSet<String> get hojasSeleccionadasIds =>
+      _calculadoraService.hojasSeleccionadasIds;
+  RxSet<String> get laminadosSeleccionadosIds =>
+      _calculadoraService.laminadosSeleccionadosIds;
+  Rx<TamanoSticker> get tamanoSeleccionado =>
+      _calculadoraService.tamanoSeleccionado;
+  Rx<TipoDiseno> get tipoDiseno => _calculadoraService.tipoDiseno;
+  RxDouble get precioDiseno => _calculadoraService.precioDiseno;
+  RxBool get aplicarDesperdicio => _calculadoraService.aplicarDesperdicio;
+  RxInt get cantidad => _calculadoraService.cantidad;
+  RxDouble get costoMateriales => _calculadoraService.costoMateriales;
+  RxDouble get costosFijos => _calculadoraService.costosFijos;
+  RxDouble get subtotal => _calculadoraService.subtotal;
+  RxDouble get ganancia => _calculadoraService.ganancia;
+  RxDouble get precioUnitario => _calculadoraService.precioUnitario;
+  RxDouble get precioTotal => _calculadoraService.precioTotal;
   RxList<ProyectoModel> get proyectos => _calculadoraService.proyectos;
   Rx<ProyectoModel?> get proyectoSeleccionado =>
       _calculadoraService.proyectoSeleccionado;
+  RxBool get cargando => _calculadoraService.cargando;
+  RxString get error => _calculadoraService.error;
 
-  // Añadir este método para seleccionar un proyecto
-  void seleccionarProyecto(ProyectoModel proyecto) {
-    _calculadoraService.seleccionarProyecto(proyecto);
-    update(); // Notifica a GetBuilder para actualizarse
-  }
+  // Clientes para selector
+  RxList<ClienteModel> clientes = <ClienteModel>[].obs;
+  RxList<ClienteModel> clientesFiltrados = <ClienteModel>[].obs;
+  Rx<ClienteModel?> clienteSeleccionado = Rx<ClienteModel?>(null);
 
   @override
   void onInit() {
     super.onInit();
-    cargarClientes();
-    print("CalculadoraController: onInit iniciado");
-    _cargarDatos();
-    _inicializar();
+    cargarDatos();
   }
 
-  Future<void> _cargarDatos() async {
-    cargando.value = true;
+  // Cargar datos iniciales
+  Future<void> cargarDatos() async {
     try {
-      // Código existente para cargar otros datos...
+      cargando.value = true;
 
-      // Cargar proyectos
-      await _calculadoraService.cargarProyectos();
+      // Cargar clientes
+      await cargarClientes();
 
-      // Calcular precio con los datos iniciales
-      calcularPrecio();
+      // Cargar materiales y configuración del servicio
+      await _calculadoraService.actualizarDatos();
+
+      update(); // Actualizar UI
     } catch (e) {
       error.value = 'Error al cargar datos: $e';
-    } finally {
-      cargando.value = false;
-    }
-  }
-
-  // Añade este método al CalculadoraController si no existe o está comentado
-  Future<void> refrescarDatos() async {
-    try {
-      cargando.value = true;
-      error.value = '';
-
-      // Obtener el servicio de calculadora
-      final calculadoraService = Get.find<CalculadoraService>();
-
-      // Actualizar datos en el servicio
-      await calculadoraService.actualizarDatos();
-      await _calculadoraService.cargarProyectos();
-
-      // Actualizar valores en el controlador
-      hojaSeleccionada.value = calculadoraService.hojaSeleccionada.value;
-      laminadoSeleccionada.value =
-          calculadoraService.laminadoSeleccionada.value;
-      tamanoSeleccionado.value = calculadoraService.tamanoSeleccionado.value;
-      tipoDiseno.value = calculadoraService.tipoDiseno.value;
-      precioDiseno.value = calculadoraService.precioDiseno.value;
-      aplicarDesperdicio.value = calculadoraService.aplicarDesperdicio.value;
-      cantidad.value = calculadoraService.cantidad.value;
-
-      // Recalcular precios
-      calcularPrecio();
-
-      update(); // Actualizar la UI
-
-      return Future.value();
-    } catch (e) {
-      error.value = 'Error al actualizar datos: $e';
       print(error.value);
-      return Future.error(error.value);
     } finally {
       cargando.value = false;
     }
   }
 
-  // Añadir estos métodos nuevos
-  Future<void> cargarClientes() async {
-    try {
-      // Usar el servicio de clientes para cargar la lista
-      final clienteService = Get.find<ClienteService>();
-      await clienteService.cargarClientes();
-      clientes.assignAll(clienteService.clientes);
-      clientesFiltrados.assignAll(clientes);
+  // Verificar si hay materiales disponibles para seleccionar
+  bool get hayHojasDisponiblesParaSeleccionar =>
+      _calculadoraService.hayHojasDisponiblesParaSeleccionar;
 
-      // Verificar si hay un cliente seleccionado en el carrito
-      final carritoService = Get.find<CarritoService>();
-      if (carritoService.clienteSeleccionado.value != null &&
-          clienteSeleccionado.value == null) {
-        clienteSeleccionado.value = carritoService.clienteSeleccionado.value;
-      }
-    } catch (e) {
-      print('Error al cargar clientes: $e');
-    }
+  bool get hayLaminadosDisponiblesParaSeleccionar =>
+      _calculadoraService.hayLaminadosDisponiblesParaSeleccionar;
+
+  // Agregar una hoja a la selección
+  void agregarHoja(HojaModel hoja) {
+    _calculadoraService.agregarHoja(hoja);
+    update();
   }
 
-  void seleccionarCliente(ClienteModel cliente) {
-    clienteSeleccionado.value = cliente;
-
-    // Sincronizar con el carrito
-    final carritoService = Get.find<CarritoService>();
-    carritoService.seleccionarCliente(cliente);
+  // Agregar un laminado a la selección
+  void agregarLaminado(LaminadoModel laminado) {
+    _calculadoraService.agregarLaminado(laminado);
+    update();
   }
 
-  void filtrarClientes(String query) {
-    if (query.isEmpty) {
-      clientesFiltrados.assignAll(clientes);
-    } else {
-      clientesFiltrados.assignAll(
-        clientes
-            .where(
-              (cliente) =>
-                  cliente.nombre.toLowerCase().contains(query.toLowerCase()) ||
-                  cliente.zona.toLowerCase().contains(query.toLowerCase()) ||
-                  cliente.tipoCliente.toLowerCase().contains(
-                    query.toLowerCase(),
-                  ),
-            )
-            .toList(),
-      );
-    }
+  // Quitar una hoja de la selección
+  void quitarHoja(int index) {
+    _calculadoraService.quitarHoja(index);
+    update();
   }
 
-  // Método de inicialización
-  void _inicializar() async {
-    try {
-      cargando.value = true;
-      error.value = '';
-
-      print("CalculadoraController: Obteniendo servicios");
-      // Asegurarse de que los servicios están inicializados
-      if (!_calculadoraService.hojas.isNotEmpty) {
-        print("CalculadoraController: Materiales no cargados, recargando");
-        await _calculadoraService.cargarMateriales();
-      }
-
-      // Actualizar listas de materiales
-      print("CalculadoraController: Actualizando listas de materiales");
-      hojas.assignAll(_calculadoraService.hojas);
-      laminados.assignAll(_calculadoraService.laminados);
-
-      // Actualizar selecciones si las listas no están vacías
-      print("CalculadoraController: Verificando si hay materiales disponibles");
-      print("CalculadoraController: Hojas disponibles: ${hojas.length}");
-      print(
-        "CalculadoraController: Laminados disponibles: ${laminados.length}",
-      );
-
-      if (hojas.isNotEmpty) {
-        hojaSeleccionada.value = hojas.first;
-      }
-
-      if (laminados.isNotEmpty) {
-        laminadoSeleccionada.value = laminados.first;
-      }
-
-      // Actualizar configuración desde servicio
-      aplicarDesperdicio.value = _calculadoraService.aplicarDesperdicio.value;
-
-      // Calcular precios iniciales
-      calcularPrecio();
-    } catch (e) {
-      error.value = 'Error al inicializar calculadora: $e';
-      print("CalculadoraController ERROR: ${error.value}");
-    } finally {
-      cargando.value = false;
-      print("CalculadoraController: Inicialización completada");
-    }
+  // Quitar un laminado de la selección
+  void quitarLaminado(int index) {
+    _calculadoraService.quitarLaminado(index);
+    update();
   }
 
-  // Método para calcular precio
-  void calcularPrecio() {
-    print("CalculadoraController: Calculando precio");
-    try {
-      if (hojaSeleccionada.value == null ||
-          laminadoSeleccionada.value == null) {
-        print("CalculadoraController: Materiales no seleccionados");
-        return;
-      }
-
-      // Actualizar servicio con las selecciones actuales
-      _calculadoraService.hojaSeleccionada.value = hojaSeleccionada.value;
-      _calculadoraService.laminadoSeleccionada.value =
-          laminadoSeleccionada.value;
-      _calculadoraService.tamanoSeleccionado.value = tamanoSeleccionado.value;
-      _calculadoraService.tipoDiseno.value = tipoDiseno.value;
-      _calculadoraService.precioDiseno.value = precioDiseno.value;
-      _calculadoraService.aplicarDesperdicio.value = aplicarDesperdicio.value;
-      _calculadoraService.cantidad.value = cantidad.value;
-
-      // Calcular precio en el servicio
-      _calculadoraService.calcularPrecio();
-
-      // Actualizar resultados desde el servicio
-      costoMateriales.value = _calculadoraService.costoMateriales.value;
-      costosFijos.value = _calculadoraService.costosFijos.value;
-      subtotal.value = _calculadoraService.subtotal.value;
-      ganancia.value = _calculadoraService.ganancia.value;
-      precioUnitario.value = _calculadoraService.precioUnitario.value;
-      precioTotal.value = _calculadoraService.precioTotal.value;
-
-      print(
-        "CalculadoraController: Precio calculado - Unitario: ${precioUnitario.value}, Total: ${precioTotal.value}",
-      );
-
-      // Forzar una actualización de la UI
-      update();
-    } catch (e) {
-      error.value = 'Error en el cálculo: $e';
-      print("CalculadoraController ERROR: ${error.value}");
-    }
-  }
-
-  // Métodos para actualizar selecciones
-  void seleccionarHoja(HojaModel hoja) {
-    print("CalculadoraController: Seleccionando hoja: ${hoja.nombre}");
-    hojaSeleccionada.value = hoja;
-    calcularPrecio();
-  }
-
-  void seleccionarLaminado(LaminadoModel laminado) {
-    print("CalculadoraController: Seleccionando laminado: ${laminado.nombre}");
-    laminadoSeleccionada.value = laminado;
-    calcularPrecio();
-  }
-
+  // Seleccionar tamaño
   void seleccionarTamano(TamanoSticker tamano) {
-    print("CalculadoraController: Seleccionando tamaño: $tamano");
-    tamanoSeleccionado.value = tamano;
-    calcularPrecio();
+    _calculadoraService.tamanoSeleccionado.value = tamano;
+    _calculadoraService.calcularPrecio();
+    update();
   }
 
+  // Seleccionar tipo de diseño
   void seleccionarTipoDiseno(TipoDiseno tipo) {
-    print("CalculadoraController: Seleccionando tipo diseño: $tipo");
-    tipoDiseno.value = tipo;
-    calcularPrecio();
+    _calculadoraService.tipoDiseno.value = tipo;
+    if (tipo == TipoDiseno.estandar) {
+      _calculadoraService.precioDiseno.value =
+          _calculadoraService.configuracion.precioDisenioEstandar;
+    }
+    _calculadoraService.calcularPrecio();
+    update();
   }
 
+  // Cambiar precio de diseño
   void cambiarPrecioDiseno(double precio) {
-    print("CalculadoraController: Cambiando precio diseño: $precio");
-    precioDiseno.value = precio;
-    calcularPrecio();
+    _calculadoraService.precioDiseno.value = precio;
+    _calculadoraService.calcularPrecio();
+    update();
   }
 
+  // Cambiar cantidad
   void cambiarCantidad(int nuevaCantidad) {
-    print("CalculadoraController: Cambiando cantidad: $nuevaCantidad");
-    if (nuevaCantidad < 1) nuevaCantidad = 1;
-    cantidad.value = nuevaCantidad;
-    calcularPrecio();
+    _calculadoraService.cantidad.value = nuevaCantidad < 1 ? 1 : nuevaCantidad;
+    _calculadoraService.calcularPrecio();
+    update();
   }
 
+  // Toggle para aplicar desperdicio
   void toggleDesperdicio(bool valor) {
-    print("CalculadoraController: Toggle desperdicio: $valor");
-    aplicarDesperdicio.value = valor;
-    calcularPrecio();
+    _calculadoraService.aplicarDesperdicio.value = valor;
+    _calculadoraService.calcularPrecio();
+    update();
   }
 
-  void resetear() {
-    print("CalculadoraController: Reseteando calculadora");
-    _calculadoraService.resetear();
-
-    // Actualizar valores locales desde el servicio
-    tamanoSeleccionado.value = _calculadoraService.tamanoSeleccionado.value;
-    tipoDiseno.value = _calculadoraService.tipoDiseno.value;
-    precioDiseno.value = _calculadoraService.precioDiseno.value;
-    aplicarDesperdicio.value = _calculadoraService.aplicarDesperdicio.value;
-    cantidad.value = _calculadoraService.cantidad.value;
-
-    // Recalcular
-    calcularPrecio();
+  // Seleccionar proyecto
+  void seleccionarProyecto(ProyectoModel proyecto) {
+    _calculadoraService.proyectoSeleccionado.value = proyecto;
+    update();
   }
-  // Método para calcular costo de tinta
 
-  // Método para calcular costo de tinta
+  // Calcular costo de tinta según el tamaño
   double calcularCostoTinta() {
     // Valor base para un cuarto de hoja
     double costoCuarto = 2.0;
@@ -337,34 +168,35 @@ class CalculadoraController extends GetxController {
     }
   }
 
+  // Resetear los valores del cálculo
+  void resetear() {
+    _calculadoraService.resetear();
+    update();
+  }
+
+  // Recargar materiales
+  Future<void> recargarMateriales() async {
+    await _calculadoraService.cargarMateriales();
+    update();
+  }
+
+  // Actualizar todos los datos
+  Future<void> refrescarDatos() async {
+    await _calculadoraService.actualizarDatos();
+    update();
+    return Future.value();
+  }
+
+  // Agregar al carrito
   void agregarAlCarrito() {
-    if (hojaSeleccionada.value == null || laminadoSeleccionada.value == null) {
-      Get.snackbar(
-        'Error',
-        'Seleccione los materiales',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    if (clienteSeleccionado.value == null) {
-      Get.snackbar(
-        'Error',
-        'Seleccione un cliente primero',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
     try {
-      // Crear ítem de venta desde los datos actuales
-      ItemVentaModel item = calculadoraService.crearItemVenta();
+      if (hojasSeleccionadas.isEmpty || laminadosSeleccionados.isEmpty) {
+        error.value = 'Seleccione al menos un material de cada tipo';
+        return;
+      }
 
-      // Agregar al carrito
-      carritoService.agregarItem(item);
-
-      // Ya no es necesario seleccionar cliente en el carrito porque
-      // ya lo hemos sincronizado antes
+      final itemVenta = _calculadoraService.crearItemVenta();
+      _carritoService.agregarItem(itemVenta);
 
       // Mostrar mensaje de éxito
       Get.snackbar(
@@ -373,13 +205,44 @@ class CalculadoraController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      // Resetear calculadora para nuevo cálculo
+      // Resetear para nueva calculación
       resetear();
-
-      // Navegar al carrito (opcional, podemos mantenerlo o quitarlo)
-      // Get.find<HomeController>().changeIndex(3);
     } catch (e) {
-      Get.snackbar('Error', e.toString(), snackPosition: SnackPosition.BOTTOM);
+      error.value = 'Error al agregar al carrito: $e';
+      print(error.value);
+      Get.snackbar('Error', error.value, snackPosition: SnackPosition.BOTTOM);
     }
+  }
+
+  // Cargar clientes
+  Future<void> cargarClientes() async {
+    try {
+      List<ClienteModel> listaClientes =
+          await _clienteService.obtenerClientes();
+      clientes.assignAll(listaClientes);
+      clientesFiltrados.assignAll(listaClientes);
+    } catch (e) {
+      print('Error al cargar clientes: $e');
+    }
+  }
+
+  // Filtrar clientes
+  void filtrarClientes(String query) {
+    if (query.isEmpty) {
+      clientesFiltrados.assignAll(clientes);
+    } else {
+      clientesFiltrados.assignAll(
+        clientes.where(
+          (cliente) =>
+              cliente.nombre.toLowerCase().contains(query.toLowerCase()) ||
+              cliente.zona.toLowerCase().contains(query.toLowerCase()),
+        ),
+      );
+    }
+  }
+
+  // Seleccionar cliente
+  void seleccionarCliente(ClienteModel cliente) {
+    clienteSeleccionado.value = cliente;
   }
 }

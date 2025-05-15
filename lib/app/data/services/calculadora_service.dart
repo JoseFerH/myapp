@@ -187,7 +187,7 @@ class CalculadoraService extends GetxService {
 
   // Calcular precio según las selecciones actuales
   void calcularPrecio() {
-    if (hojasSeleccionadas.isEmpty || laminadosSeleccionados.isEmpty) {
+    if (hojasSeleccionadas.isEmpty && laminadosSeleccionados.isEmpty) {
       error.value = 'Seleccione al menos un material de cada tipo';
       return;
     }
@@ -314,20 +314,32 @@ class CalculadoraService extends GetxService {
 
   // Crear un ItemVentaModel con los datos actuales
   ItemVentaModel crearItemVenta() {
-    if (hojasSeleccionadas.isEmpty || laminadosSeleccionados.isEmpty) {
-      throw Exception('Seleccione al menos un material de cada tipo');
-    }
-
     // Calcular el precio actual
     calcularPrecio();
 
-    // Para mantener compatibilidad con el resto del sistema, usamos el primer material de cada tipo
-    // En una implementación completa, habría que modificar el ItemVentaModel para soportar múltiples materiales
+    // Valores por defecto para cuando no hay materiales seleccionados
+    String hojaId = "";
+    String nombreHoja = "Sin hoja";
+    String laminadoId = "";
+    String nombreLaminado = "Sin laminado";
+
+    // Si hay hojas seleccionadas, obtener los datos
+    if (hojasSeleccionadas.isNotEmpty) {
+      hojaId = hojasSeleccionadas.first.id;
+      nombreHoja = hojasSeleccionadas.map((h) => h.nombre).join(", ");
+    }
+
+    // Si hay laminados seleccionados, obtener los datos
+    if (laminadosSeleccionados.isNotEmpty) {
+      laminadoId = laminadosSeleccionados.first.id;
+      nombreLaminado = laminadosSeleccionados.map((l) => l.nombre).join(", ");
+    }
+
     return ItemVentaModel(
-      hojaId: hojasSeleccionadas.first.id,
-      nombreHoja: hojasSeleccionadas.map((h) => h.nombre).join(", "),
-      laminadoId: laminadosSeleccionados.first.id,
-      nombreLaminado: laminadosSeleccionados.map((l) => l.nombre).join(", "),
+      hojaId: hojaId,
+      nombreHoja: nombreHoja,
+      laminadoId: laminadoId,
+      nombreLaminado: nombreLaminado,
       tamano: tamanoSeleccionado.value,
       tipoDiseno: tipoDiseno.value,
       precioDiseno:

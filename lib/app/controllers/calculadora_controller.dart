@@ -190,8 +190,10 @@ class CalculadoraController extends GetxController {
   // Agregar al carrito
   void agregarAlCarrito() {
     try {
-      if (hojasSeleccionadas.isEmpty || laminadosSeleccionados.isEmpty) {
-        error.value = 'Seleccione al menos un material de cada tipo';
+      // Nueva validación que solo requiere al menos un tipo de material
+      if (hojasSeleccionadas.isEmpty && laminadosSeleccionados.isEmpty) {
+        error.value = 'Seleccione al menos un tipo de material';
+        Get.snackbar('Error', error.value, snackPosition: SnackPosition.BOTTOM);
         return;
       }
 

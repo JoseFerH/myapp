@@ -1,3 +1,6 @@
+// lib/app/modules/calculadora/calculadora_view.dart
+// Agrega los componentes faltantes en la vista de la calculadora
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../controllers/calculadora_controller.dart';
@@ -7,6 +10,9 @@ import 'components/selector_diseno_component.dart';
 import 'components/checkbox_desperdicio_component.dart';
 import 'components/input_cantidad_component.dart';
 import 'components/preview_calculo_component.dart';
+// Agrega estas importaciones que faltaban
+import 'components/selector_cliente_calculadora_component.dart';
+import 'components/selector_proyecto_component.dart';
 import '../../widgets/loading_indicator.dart';
 import '../../widgets/error_message.dart';
 import '../../widgets/custom_button.dart';
@@ -68,6 +74,17 @@ class CalculadoraView extends GetView<CalculadoraController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Añadir aquí los componentes que se perdieron
+                      // Selector de cliente
+                      const SelectorClienteCalculadoraComponent(),
+
+                      const SizedBox(height: 20),
+
+                      // Selector de proyecto
+                      const SelectorProyectoComponent(),
+
+                      const SizedBox(height: 20),
+
                       // Selectores de material
                       const SelectorMaterialComponent(),
 

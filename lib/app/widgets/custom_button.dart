@@ -8,31 +8,31 @@ import '../utils/themes.dart';
 class CustomButton extends StatelessWidget {
   // Texto del botón
   final String text;
-  
+
   // Acción al presionar
   final VoidCallback? onPressed;
-  
+
   // Si es botón secundario (gris) en lugar de primario (azul)
   final bool isSecondary;
-  
+
   // Si está en estado de carga
   final bool isLoading;
-  
+
   // Si ocupa todo el ancho disponible
   final bool isFullWidth;
-  
+
   // Icono opcional
   final IconData? icon;
-  
+
   // Tipo de botón (afecta el estilo)
   final ButtonType type;
-  
+
   // Tamaño del botón
   final ButtonSize size;
-  
+
   // Padding interno
   final EdgeInsetsGeometry? padding;
-  
+
   // Constructor
   const CustomButton({
     Key? key,
@@ -52,26 +52,39 @@ class CustomButton extends StatelessWidget {
     // Determinar colores según tipo y estado
     final Color backgroundColor = _getBackgroundColor();
     final Color textColor = _getTextColor();
-    
+
     // Determinar padding según tamaño
     final EdgeInsetsGeometry buttonPadding = padding ?? _getPadding();
-    
+
     // Determinar contenido del botón
     Widget buttonContent = _buildButtonContent(textColor);
-    
+
     // Construir el botón según el tipo
     switch (type) {
       case ButtonType.filled:
-        return _buildFilledButton(backgroundColor, buttonPadding, buttonContent);
+        return _buildFilledButton(
+          backgroundColor,
+          buttonPadding,
+          buttonContent,
+        );
       case ButtonType.outlined:
-        return _buildOutlinedButton(backgroundColor, textColor, buttonPadding, buttonContent);
+        return _buildOutlinedButton(
+          backgroundColor,
+          textColor,
+          buttonPadding,
+          buttonContent,
+        );
       case ButtonType.text:
         return _buildTextButton(textColor, buttonPadding, buttonContent);
     }
   }
-  
+
   // Construir botón relleno
-  Widget _buildFilledButton(Color backgroundColor, EdgeInsetsGeometry padding, Widget content) {
+  Widget _buildFilledButton(
+    Color backgroundColor,
+    EdgeInsetsGeometry padding,
+    Widget content,
+  ) {
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       child: CupertinoButton(
@@ -84,9 +97,14 @@ class CustomButton extends StatelessWidget {
       ),
     );
   }
-  
+
   // Construir botón con borde
-  Widget _buildOutlinedButton(Color borderColor, Color textColor, EdgeInsetsGeometry padding, Widget content) {
+  Widget _buildOutlinedButton(
+    Color borderColor,
+    Color textColor,
+    EdgeInsetsGeometry padding,
+    Widget content,
+  ) {
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       child: CupertinoButton(
@@ -94,7 +112,9 @@ class CustomButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: onPressed == null ? AppColors.disabled : borderColor),
+            border: Border.all(
+              color: onPressed == null ? AppColors.disabled : borderColor,
+            ),
             borderRadius: BorderRadius.circular(AppDimensions.borderRadius8),
           ),
           padding: padding,
@@ -103,9 +123,13 @@ class CustomButton extends StatelessWidget {
       ),
     );
   }
-  
+
   // Construir botón de texto
-  Widget _buildTextButton(Color textColor, EdgeInsetsGeometry padding, Widget content) {
+  Widget _buildTextButton(
+    Color textColor,
+    EdgeInsetsGeometry padding,
+    Widget content,
+  ) {
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       child: CupertinoButton(
@@ -115,25 +139,24 @@ class CustomButton extends StatelessWidget {
       ),
     );
   }
-  
+
   // Construir contenido del botón (texto, icono, spinner)
   Widget _buildButtonContent(Color textColor) {
+    // Determinar color del indicador de carga según tipo de botón
+    // Siempre usar blanco para botones con fondo de color
+    final Color loadingColor =
+        type == ButtonType.filled ? CupertinoColors.white : textColor;
+
     if (isLoading) {
-      return CupertinoActivityIndicator(
-        color: type == ButtonType.filled ? CupertinoColors.white : textColor,
-      );
+      return CupertinoActivityIndicator(color: loadingColor);
     }
-    
+
     if (icon != null) {
       return Row(
         mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: textColor,
-            size: _getIconSize(),
-          ),
+          Icon(icon, color: textColor, size: _getIconSize()),
           const SizedBox(width: 8),
           Text(
             text,
@@ -146,7 +169,7 @@ class CustomButton extends StatelessWidget {
         ],
       );
     }
-    
+
     return Text(
       text,
       style: TextStyle(
@@ -156,13 +179,13 @@ class CustomButton extends StatelessWidget {
       ),
     );
   }
-  
+
   // Obtener el color de fondo según tipo y estado
   Color _getBackgroundColor() {
     if (onPressed == null) {
       return AppColors.disabled;
     }
-    
+
     if (isSecondary) {
       switch (type) {
         case ButtonType.filled:
@@ -181,16 +204,17 @@ class CustomButton extends StatelessWidget {
       }
     }
   }
-  
+
   // Obtener color de texto según tipo y estado
   Color _getTextColor() {
     if (onPressed == null) {
       return AppColors.textTertiary;
     }
-    
+
     if (isSecondary) {
       switch (type) {
         case ButtonType.filled:
+          // Usar color oscuro para botones secundarios con fondo claro
           return AppColors.textPrimary;
         case ButtonType.outlined:
         case ButtonType.text:
@@ -199,6 +223,7 @@ class CustomButton extends StatelessWidget {
     } else {
       switch (type) {
         case ButtonType.filled:
+          // SIEMPRE usar texto blanco para botones con fondo de color
           return CupertinoColors.white;
         case ButtonType.outlined:
         case ButtonType.text:
@@ -206,7 +231,7 @@ class CustomButton extends StatelessWidget {
       }
     }
   }
-  
+
   // Obtener padding según tamaño
   EdgeInsetsGeometry _getPadding() {
     switch (size) {
@@ -218,7 +243,7 @@ class CustomButton extends StatelessWidget {
         return const EdgeInsets.symmetric(horizontal: 20, vertical: 16);
     }
   }
-  
+
   // Obtener tamaño de fuente según tamaño del botón
   double _getFontSize() {
     switch (size) {
@@ -230,7 +255,7 @@ class CustomButton extends StatelessWidget {
         return 18;
     }
   }
-  
+
   // Obtener tamaño de icono según tamaño del botón
   double _getIconSize() {
     switch (size) {
@@ -246,16 +271,16 @@ class CustomButton extends StatelessWidget {
 
 // Tamaños de botón
 enum ButtonSize {
-  small,   // Pequeño (útil para acciones secundarias)
+  small, // Pequeño (útil para acciones secundarias)
   regular, // Tamaño estándar
-  large,   // Grande (para acciones principales)
+  large, // Grande (para acciones principales)
 }
 
 // Tipos de botón
 enum ButtonType {
-  filled,   // Botón con fondo (primario)
+  filled, // Botón con fondo (primario)
   outlined, // Botón con borde
-  text,     // Botón solo texto
+  text, // Botón solo texto
 }
 
 // Botones especializados
@@ -268,7 +293,7 @@ class PrimaryButton extends StatelessWidget {
   final IconData? icon;
   final bool isFullWidth;
   final ButtonSize size;
-  
+
   const PrimaryButton({
     Key? key,
     required this.text,
@@ -301,7 +326,7 @@ class SecondaryButton extends StatelessWidget {
   final IconData? icon;
   final bool isFullWidth;
   final ButtonSize size;
-  
+
   const SecondaryButton({
     Key? key,
     required this.text,
@@ -327,7 +352,7 @@ class SecondaryButton extends StatelessWidget {
   }
 }
 
-// Botón de borde
+// Botón con borde
 class OutlinedButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -336,7 +361,7 @@ class OutlinedButton extends StatelessWidget {
   final bool isFullWidth;
   final bool isSecondary;
   final ButtonSize size;
-  
+
   const OutlinedButton({
     Key? key,
     required this.text,
@@ -371,7 +396,7 @@ class TextButton extends StatelessWidget {
   final IconData? icon;
   final bool isSecondary;
   final ButtonSize size;
-  
+
   const TextButton({
     Key? key,
     required this.text,
@@ -406,7 +431,7 @@ class IconButton extends StatelessWidget {
   final double size;
   final Color? backgroundColor;
   final Color? iconColor;
-  
+
   const IconButton({
     Key? key,
     required this.icon,
@@ -420,12 +445,15 @@ class IconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = backgroundColor ?? 
+    // Garantizar alto contraste: si hay fondo de color, usar icono blanco por defecto
+    final Color bgColor =
+        backgroundColor ??
         (isSecondary ? AppColors.secondaryBackground : AppColors.primary);
-    
-    final Color fgColor = iconColor ?? 
+
+    final Color fgColor =
+        iconColor ??
         (isSecondary ? AppColors.textPrimary : CupertinoColors.white);
-    
+
     return GestureDetector(
       onTap: onPressed,
       child: Container(
@@ -434,15 +462,12 @@ class IconButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
-          borderRadius: isCircular ? null : BorderRadius.circular(AppDimensions.borderRadius8),
+          borderRadius:
+              isCircular
+                  ? null
+                  : BorderRadius.circular(AppDimensions.borderRadius8),
         ),
-        child: Center(
-          child: Icon(
-            icon,
-            color: fgColor,
-            size: size * 0.5,
-          ),
-        ),
+        child: Center(child: Icon(icon, color: fgColor, size: size * 0.5)),
       ),
     );
   }

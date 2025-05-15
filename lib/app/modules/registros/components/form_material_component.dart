@@ -8,8 +8,13 @@ import '../../../data/models/laminado_model.dart';
 
 class FormMaterialComponent extends StatefulWidget {
   final MaterialModel? material;
+  final TipoMaterial? tipoInicial; // Añadir este parámetro
 
-  const FormMaterialComponent({Key? key, this.material}) : super(key: key);
+  const FormMaterialComponent({
+    Key? key,
+    this.material,
+    this.tipoInicial, // Nuevo parámetro opcional
+  }) : super(key: key);
 
   @override
   _FormMaterialComponentState createState() => _FormMaterialComponentState();
@@ -47,6 +52,10 @@ class _FormMaterialComponentState extends State<FormMaterialComponent> {
   @override
   void initState() {
     super.initState();
+    // Inicializar con tipoInicial si está presente, o usar el tipo del material existente, o el valor por defecto
+    tipoMaterial = Rx<TipoMaterial>(
+      widget.tipoInicial ?? widget.material?.tipo ?? TipoMaterial.hoja,
+    );
 
     // Obtener el controlador
     controller = Get.find<RegistrosController>();

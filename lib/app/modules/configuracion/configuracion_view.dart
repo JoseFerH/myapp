@@ -9,6 +9,7 @@ import 'components/costos_fijos_component.dart';
 import 'components/porcentajes_component.dart';
 import 'components/envio_component.dart';
 import 'components/diseno_component.dart';
+import 'components/proyectos_component.dart';
 
 class ConfiguracionView extends GetView<ConfiguracionController> {
   const ConfiguracionView({Key? key}) : super(key: key);
@@ -22,7 +23,7 @@ class ConfiguracionView extends GetView<ConfiguracionController> {
           if (controller.cargando.value) {
             return const LoadingIndicator(message: 'Cargando configuración...');
           }
-          
+
           // Mostrar error si existe
           if (controller.error.value.isNotEmpty) {
             return ErrorMessage(
@@ -30,7 +31,7 @@ class ConfiguracionView extends GetView<ConfiguracionController> {
               onRetry: () => controller.onInit(),
             );
           }
-          
+
           return Column(
             children: [
               // Segmented Control para seleccionar sección
@@ -54,6 +55,10 @@ class ConfiguracionView extends GetView<ConfiguracionController> {
                       padding: EdgeInsets.symmetric(horizontal: 16),
                       child: Text('Diseño'),
                     ),
+                    4: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text('Proyectos'),
+                    ),
                   },
                   groupValue: controller.tabIndex.value,
                   onValueChanged: (value) {
@@ -63,7 +68,7 @@ class ConfiguracionView extends GetView<ConfiguracionController> {
                   },
                 ),
               ),
-              
+
               // Contenido según pestaña seleccionada
               Expanded(
                 child: SingleChildScrollView(
@@ -78,23 +83,29 @@ class ConfiguracionView extends GetView<ConfiguracionController> {
                         return const EnvioComponent();
                       case 3:
                         return const DisenoComponent();
+                      case 4:
+                        return const ProyectosComponent();
                       default:
                         return const CostosFijosComponent();
                     }
                   }),
                 ),
               ),
-              
+
               // Botón de guardar al final
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: CupertinoButton.filled(
-                  onPressed: controller.cargando.value
-                      ? null
-                      : controller.guardarConfiguracion,
-                  child: controller.cargando.value
-                      ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                      : const Text('Guardar Configuración'),
+                  onPressed:
+                      controller.cargando.value
+                          ? null
+                          : controller.guardarConfiguracion,
+                  child:
+                      controller.cargando.value
+                          ? const CupertinoActivityIndicator(
+                            color: CupertinoColors.white,
+                          )
+                          : const Text('Guardar Configuración'),
                 ),
               ),
             ],

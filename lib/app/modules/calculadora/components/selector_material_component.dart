@@ -5,6 +5,8 @@ import '../../../controllers/registros_controller.dart';
 import '../../../widgets/custom_dropdown.dart';
 import '../../../data/models/hoja_model.dart';
 import '../../../data/models/laminado_model.dart';
+import '../../../modules/registros/components/form_material_component.dart';
+import '../../../data/models/material_model.dart'; // Importa TipoMaterial
 
 class SelectorMaterialComponent extends GetView<CalculadoraController> {
   const SelectorMaterialComponent({Key? key}) : super(key: key);
@@ -596,69 +598,16 @@ class SelectorMaterialComponent extends GetView<CalculadoraController> {
                 topRight: Radius.circular(20),
               ),
             ),
-            child: Column(
-              children: [
-                // Título del formulario
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        tipoMaterial == 'hoja'
-                            ? 'Nueva Hoja'
-                            : 'Nuevo Laminado',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        child: const Text('Cerrar'),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Contenido del formulario - usando el FormMaterialComponent existente
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          // Aquí iría el contenido del formulario para crear un nuevo material
-                          Text(
-                            'Formulario para agregar un nuevo ${tipoMaterial}',
-                          ),
-                          // En una implementación real, este sería el componente FormMaterialComponent
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Botones de acción
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: CupertinoButton(
-                    padding: const EdgeInsets.all(12),
-                    color: CupertinoColors.activeBlue,
-                    child: const Text('Guardar'),
-                    onPressed: () {
-                      // Aquí iría la lógica para guardar el nuevo material
-
-                      // Después de guardar, recargar materiales
-                      controller.recargarMateriales().then((_) {
-                        // Cerrar formulario
-                        Navigator.pop(context);
-                      });
-                    },
-                  ),
-                ),
-              ],
+            // Reemplazar toda la estructura actual con el FormMaterialComponent
+            child: FormMaterialComponent(
+              // Pasar null como material para indicar que es uno nuevo
+              // El FormMaterialComponent ya maneja los títulos, campos y botones
+              material: null,
+              // Este es el cambio más importante - inicializar con el tipo correcto
+              tipoInicial:
+                  tipoMaterial == 'hoja'
+                      ? TipoMaterial.hoja
+                      : TipoMaterial.laminado,
             ),
           ),
     );

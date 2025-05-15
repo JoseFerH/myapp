@@ -3,7 +3,6 @@ import '../data/models/configuracion_model.dart';
 import '../data/models/costo_fijo_model.dart';
 import '../data/providers/configuracion_provider.dart';
 import '../data/models/proyecto_model.dart';
-import '../data/models/proyecto_model.dart';
 import '../data/providers/proyectos_provider.dart';
 
 class ConfiguracionController extends GetxController {

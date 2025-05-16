@@ -17,48 +17,36 @@ class SelectorTamanoComponent extends GetView<CalculadoraController> {
           children: [
             const Text(
               'Tamaño del Sticker',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 16),
+
+            Obx(
+              () => CupertinoSegmentedControl<TamanoSticker>(
+                children: const {
+                  TamanoSticker.cuarto: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text("1/4"),
+                  ),
+                  TamanoSticker.completo: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text("Completo"),
+                  ),
+                },
+                groupValue: controller.tamanoSeleccionado.value,
+                onValueChanged: (value) {
+                  controller.seleccionarTamano(value);
+                },
               ),
             ),
-            
-            const SizedBox(height: 16),
-            
-            Obx(() => CupertinoSegmentedControl<TamanoSticker>(
-              children: const {
-                TamanoSticker.cuarto: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text("1/4"),
-                ),
-                TamanoSticker.medio: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text("1/2"),
-                ),
-                TamanoSticker.tresQuartos: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text("3/4"),
-                ),
-                TamanoSticker.completo: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text("Completo"),
-                ),
-              },
-              groupValue: controller.tamanoSeleccionado.value,
-              onValueChanged: (value) {
-                controller.seleccionarTamano(value);
-              },
-            )),
-            
+
             const SizedBox(height: 8),
-            
+
             // Texto explicativo
             const Text(
               'El tamaño afecta la cantidad de material utilizado y el precio final.',
-              style: TextStyle(
-                fontSize: 12,
-                color: CupertinoColors.systemGrey,
-              ),
+              style: TextStyle(fontSize: 12, color: CupertinoColors.systemGrey),
             ),
           ],
         ),

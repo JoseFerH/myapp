@@ -13,7 +13,7 @@ class ListaRegistrosComponent extends GetView<RegistrosController> {
   final String emptyTitle;
   final String emptyMessage;
   final IconData emptyIcon;
-  
+
   const ListaRegistrosComponent({
     Key? key,
     required this.tipo,
@@ -31,7 +31,7 @@ class ListaRegistrosComponent extends GetView<RegistrosController> {
         // Lista de elementos
         Obx(() {
           int itemCount = 0;
-          
+
           switch (tipo) {
             case 'clientes':
               itemCount = controller.clientesFiltrados.length;
@@ -43,7 +43,7 @@ class ListaRegistrosComponent extends GetView<RegistrosController> {
               itemCount = controller.materialesFiltrados.length;
               break;
           }
-          
+
           if (itemCount == 0) {
             return EmptyState(
               title: emptyTitle,
@@ -53,25 +53,44 @@ class ListaRegistrosComponent extends GetView<RegistrosController> {
               onButtonPressed: () => onAgregar(context),
             );
           }
-          
+
           return ListView.separated(
-            padding: const EdgeInsets.only(bottom: 80), // Espacio para el botón flotante
+            padding: const EdgeInsets.only(
+              bottom: 80,
+            ), // Espacio para el botón flotante
             itemCount: itemCount,
             // Correct this line to pass the context parameter to itemBuilder
             itemBuilder: (context, index) => itemBuilder(context, index),
             separatorBuilder: (context, index) => Container(height: 1),
           );
         }),
-        
+
         // Botón flotante para agregar
         Positioned(
           right: 16,
           bottom: 16,
           child: CupertinoButton(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(
+              0,
+            ), // Reducir padding para que el botón sea más compacto
             color: CupertinoColors.activeBlue,
-            child: const Icon(CupertinoIcons.add),
+            borderRadius: BorderRadius.circular(
+              30,
+            ), // Hacer el botón más circular
             onPressed: () => onAgregar(context),
+            child: const SizedBox(
+              width: 56, // Ancho fijo para el botón circular
+              height: 56, // Alto fijo para el botón circular
+              child: Center(
+                child: Icon(
+                  CupertinoIcons.add,
+                  color:
+                      CupertinoColors
+                          .white, // Garantizar que el icono sea BLANCO
+                  size: 30, // Aumentar tamaño del icono para mejor visibilidad
+                ),
+              ),
+            ),
           ),
         ),
       ],

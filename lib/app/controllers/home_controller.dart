@@ -3,7 +3,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../routes/app_routes.dart';
-import 'calculadora_controller.dart'; // Importar el controlador de calculadora
+import 'calculadora_controller.dart';
 
 class HomeController extends GetxController {
   // Índice seleccionado para el bottom navigation bar
@@ -33,14 +33,20 @@ class HomeController extends GetxController {
     super.onClose();
   }
 
-  // Método para cambiar el índice seleccionado - MODIFICADO
+  // Método para cambiar el índice seleccionado - CORREGIDO
   void changeIndex(int index) {
     selectedIndex.value = index;
-    pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+
+    // Usar jumpToPage para cambiar instantáneamente sin animación
+    // Esto evita pasar por las pestañas intermedias
+    pageController.jumpToPage(index);
+
+    // Si prefieres mantener una animación muy corta, usa esto en su lugar:
+    // pageController.animateToPage(
+    //   index,
+    //   duration: const Duration(milliseconds: 100),
+    //   curve: Curves.easeOut,
+    // );
 
     // NUEVO CÓDIGO: Si seleccionamos la pestaña de calculadora (índice 2),
     // actualizamos los datos de la calculadora para que use la configuración más reciente

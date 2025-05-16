@@ -217,14 +217,10 @@ class PreviewCalculoComponent extends GetView<CalculadoraController> {
     switch (tamano) {
       case TamanoSticker.cuarto:
         return precioBase / 4;
-      case TamanoSticker.medio:
-        return precioBase / 2;
-      case TamanoSticker.tresQuartos:
-        return precioBase * 0.75;
       case TamanoSticker.completo:
         return precioBase;
       default:
-        return precioBase / 4;
+        return precioBase / 4; // Por defecto, usar 1/4
     }
   }
 }

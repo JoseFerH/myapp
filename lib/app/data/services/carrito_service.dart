@@ -11,40 +11,40 @@ class CarritoService extends GetxService {
   final VentasProvider _ventasProvider = VentasProvider();
   final ConfiguracionProvider _configuracionProvider = ConfiguracionProvider();
   final ClientesProvider _clientesProvider = ClientesProvider();
-  
+
   // Rx Variables para el estado
   final RxBool cargando = false.obs;
   final RxString error = ''.obs;
-  
+
   // Carrito actual
   final RxList<ItemVentaModel> items = <ItemVentaModel>[].obs;
   final Rx<ClienteModel?> clienteSeleccionado = Rx<ClienteModel?>(null);
   final Rx<TipoEnvio> tipoEnvio = TipoEnvio.normal.obs;
   final RxDouble costoEnvioPersonalizado = 0.0.obs;
-  
+
   // Totales
   final RxDouble subtotal = 0.0.obs;
   final RxDouble costoEnvio = 0.0.obs;
   final RxDouble total = 0.0.obs;
-  
+
   // Notas
   final RxString notas = ''.obs;
-  
+
   // Configuración global
   late ConfiguracionModel configuracion;
-  
+
   // Inicializar servicio
   Future<CarritoService> init() async {
     try {
       cargando.value = true;
       error.value = '';
-      
+
       // Cargar configuración global
       configuracion = await _configuracionProvider.obtenerConfiguracion();
-      
+
       // Actualizar costo de envío por defecto
       costoEnvio.value = configuracion.costoEnvioNormal;
-      
+
       return this;
     } catch (e) {
       error.value = 'Error al inicializar: $e';
@@ -54,13 +54,13 @@ class CarritoService extends GetxService {
       cargando.value = false;
     }
   }
-  
+
   // Agregar item al carrito
   void agregarItem(ItemVentaModel item) {
     items.add(item);
     recalcularTotales();
   }
-  
+
   // Eliminar item del carrito
   void eliminarItem(int index) {
     if (index >= 0 && index < items.length) {
@@ -68,7 +68,7 @@ class CarritoService extends GetxService {
       recalcularTotales();
     }
   }
-  
+
   // Limpiar carrito
   void limpiarCarrito() {
     items.clear();
@@ -78,16 +78,16 @@ class CarritoService extends GetxService {
     notas.value = '';
     recalcularTotales();
   }
-  
+
   // Seleccionar cliente
   void seleccionarCliente(ClienteModel cliente) {
     clienteSeleccionado.value = cliente;
   }
-  
+
   // Seleccionar tipo de envío
   void seleccionarTipoEnvio(TipoEnvio tipo) {
     tipoEnvio.value = tipo;
-    
+
     switch (tipo) {
       case TipoEnvio.normal:
         costoEnvio.value = configuracion.costoEnvioNormal;
@@ -99,10 +99,10 @@ class CarritoService extends GetxService {
         costoEnvio.value = costoEnvioPersonalizado.value;
         break;
     }
-    
+
     recalcularTotales();
   }
-  
+
   // Establecer costo de envío personalizado
   void setCostoEnvioPersonalizado(double costo) {
     costoEnvioPersonalizado.value = costo;
@@ -111,35 +111,58 @@ class CarritoService extends GetxService {
       recalcularTotales();
     }
   }
-  
+
   // Establecer notas
   void setNotas(String texto) {
     notas.value = texto;
   }
-  
+
   // Recalcular totales
   void recalcularTotales() {
-    // Calcular subtotal
-    double subtotalTemp = 0.0;
+    // Calcular subtotal original (sin descuentos)
+    double subtotalOriginal = 0.0;
     for (var item in items) {
-      subtotalTemp += item.precioTotal;
+      subtotalOriginal += item.precioTotal;
     }
-    
-    subtotal.value = subtotalTemp;
-    
-    // Aplicar reglas especiales
+
+    // Inicializar subtotal con el valor original
+    subtotal.value = subtotalOriginal;
+
+    // Verificar si hay más de un sticker de tamaño cuarto para aplicar descuento
+    int cantidadStickers = 0;
+    for (var item in items) {
+      if (item.tamano == TamanoSticker.cuarto) {
+        cantidadStickers += item.cantidad;
+      }
+    }
+
+    // Si hay más de un sticker de tamaño cuarto, aplicar descuento del 25%
+    if (cantidadStickers > 1) {
+      double totalStickersQuarto = 0.0;
+      for (var item in items) {
+        if (item.tamano == TamanoSticker.cuarto) {
+          totalStickersQuarto += item.precioTotal;
+        }
+      }
+
+      // Aplicar descuento del 25%
+      double descuento = totalStickersQuarto * 0.25;
+      subtotal.value = subtotalOriginal - descuento;
+    }
+
+    // Aplicar reglas especiales (como promoción de redes sociales)
     _aplicarReglasEspeciales();
-    
+
     // Calcular total
     total.value = subtotal.value + costoEnvio.value;
   }
-  
+
   // Aplicar reglas especiales
   void _aplicarReglasEspeciales() {
     // Regla: Redes Sociales, 3 por Q90 con envío incluido
     // Esta regla se aplicaría según lógica de negocio específica
     // Por ahora, solo dejamos el código comentado como ejemplo
-    
+
     /*
     // Verificar si tenemos 3 stickers de tamaño cuarto
     if (items.length == 3 && 
@@ -150,23 +173,23 @@ class CarritoService extends GetxService {
     }
     */
   }
-  
+
   // Crear cotización
   Future<String> crearCotizacion() async {
     if (items.isEmpty) {
       error.value = 'El carrito está vacío';
       return '';
     }
-    
+
     if (clienteSeleccionado.value == null) {
       error.value = 'Seleccione un cliente';
       return '';
     }
-    
+
     try {
       cargando.value = true;
       error.value = '';
-      
+
       VentaModel venta = VentaModel(
         clienteId: clienteSeleccionado.value!.id,
         nombreCliente: clienteSeleccionado.value!.nombre,
@@ -179,12 +202,12 @@ class CarritoService extends GetxService {
         total: total.value,
         notas: notas.value,
       );
-      
+
       String id = await _ventasProvider.crearVenta(venta);
-      
+
       // Limpiar carrito después de crear la cotización
       limpiarCarrito();
-      
+
       return id;
     } catch (e) {
       error.value = 'Error al crear cotización: $e';
@@ -194,23 +217,23 @@ class CarritoService extends GetxService {
       cargando.value = false;
     }
   }
-  
+
   // Crear venta directa (completada)
   Future<String> crearVenta() async {
     if (items.isEmpty) {
       error.value = 'El carrito está vacío';
       return '';
     }
-    
+
     if (clienteSeleccionado.value == null) {
       error.value = 'Seleccione un cliente';
       return '';
     }
-    
+
     try {
       cargando.value = true;
       error.value = '';
-      
+
       VentaModel venta = VentaModel(
         clienteId: clienteSeleccionado.value!.id,
         nombreCliente: clienteSeleccionado.value!.nombre,
@@ -223,12 +246,12 @@ class CarritoService extends GetxService {
         total: total.value,
         notas: notas.value,
       );
-      
+
       String id = await _ventasProvider.crearVenta(venta);
-      
+
       // Limpiar carrito después de crear la venta
       limpiarCarrito();
-      
+
       return id;
     } catch (e) {
       error.value = 'Error al crear venta: $e';
@@ -238,13 +261,15 @@ class CarritoService extends GetxService {
       cargando.value = false;
     }
   }
-  
+
   // Verificar si el carrito contiene el paquete de redes sociales
   bool esPromoRedesSociales() {
-    return items.length == 3 && 
-        items.every((item) => item.tamano == TamanoSticker.cuarto && item.cantidad == 1);
+    return items.length == 3 &&
+        items.every(
+          (item) => item.tamano == TamanoSticker.cuarto && item.cantidad == 1,
+        );
   }
-  
+
   // Aplicar promoción de redes sociales
   void aplicarPromoRedesSociales() {
     if (esPromoRedesSociales()) {

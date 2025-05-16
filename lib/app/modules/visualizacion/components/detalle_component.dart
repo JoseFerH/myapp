@@ -30,10 +30,7 @@ class DetalleComponent extends GetView<VisualizacionController> {
             children: [
               const Text(
                 'Detalle de Venta',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               CupertinoButton(
                 padding: EdgeInsets.zero,
@@ -43,18 +40,16 @@ class DetalleComponent extends GetView<VisualizacionController> {
             ],
           ),
         ),
-        
+
         // Contenido detallado
         Expanded(
           child: Obx(() {
             if (controller.ventaSeleccionada.value == null) {
-              return const Center(
-                child: Text('No hay venta seleccionada'),
-              );
+              return const Center(child: Text('No hay venta seleccionada'));
             }
-            
+
             final venta = controller.ventaSeleccionada.value!;
-            
+
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -81,14 +76,12 @@ class DetalleComponent extends GetView<VisualizacionController> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            Text(
-                              'Fecha: ${formatoFecha.format(venta.fecha)}',
-                            ),
+                            Text('Fecha: ${formatoFecha.format(venta.fecha)}'),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         // Cliente y estado
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -107,7 +100,7 @@ class DetalleComponent extends GetView<VisualizacionController> {
                                 ],
                               ),
                             ),
-                            
+
                             // Estado con color según tipo
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -115,7 +108,9 @@ class DetalleComponent extends GetView<VisualizacionController> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: _getColorPorEstado(venta.estado).withOpacity(0.1),
+                                color: _getColorPorEstado(
+                                  venta.estado,
+                                ).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Text(
@@ -128,9 +123,9 @@ class DetalleComponent extends GetView<VisualizacionController> {
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         // Notas
                         if (venta.notas.isNotEmpty) ...[
                           const Text('Notas:'),
@@ -145,7 +140,7 @@ class DetalleComponent extends GetView<VisualizacionController> {
                           ),
                           const SizedBox(height: 16),
                         ],
-                        
+
                         // Tipo de envío
                         Row(
                           children: [
@@ -169,20 +164,17 @@ class DetalleComponent extends GetView<VisualizacionController> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Lista de ítems
                   const Text(
                     'Detalle de Productos',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Ítems
                   ListView.separated(
                     shrinkWrap: true,
@@ -193,9 +185,9 @@ class DetalleComponent extends GetView<VisualizacionController> {
                       return _buildItemCard(venta.items[index], formatoMoneda);
                     },
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Resumen financiero
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -248,9 +240,9 @@ class DetalleComponent extends GetView<VisualizacionController> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Botones de acción
                   Row(
                     children: [
@@ -270,9 +262,9 @@ class DetalleComponent extends GetView<VisualizacionController> {
                           onPressed: controller.generarPDFVenta,
                         ),
                       ),
-                      
+
                       const SizedBox(width: 12),
-                      
+
                       // Botón para cambiar estado
                       Expanded(
                         child: CupertinoButton(
@@ -286,7 +278,8 @@ class DetalleComponent extends GetView<VisualizacionController> {
                               Text('Cambiar Estado'),
                             ],
                           ),
-                          onPressed: () => _mostrarSelectorEstado(context, venta),
+                          onPressed:
+                              () => _mostrarSelectorEstado(context, venta),
                         ),
                       ),
                     ],
@@ -299,7 +292,7 @@ class DetalleComponent extends GetView<VisualizacionController> {
       ],
     );
   }
-  
+
   // Construir tarjeta de ítem
   Widget _buildItemCard(ItemVentaModel item, NumberFormat formatoMoneda) {
     // Mapear tamaño a texto legible
@@ -308,24 +301,19 @@ class DetalleComponent extends GetView<VisualizacionController> {
       case TamanoSticker.cuarto:
         tamanoText = '1/4 de hoja';
         break;
-      case TamanoSticker.medio:
-        tamanoText = '1/2 hoja';
-        break;
-      case TamanoSticker.tresQuartos:
-        tamanoText = '3/4 de hoja';
-        break;
       case TamanoSticker.completo:
         tamanoText = 'Hoja completa';
         break;
       default:
         tamanoText = 'Tamaño personalizado';
     }
-    
+
     // Descripción del diseño
-    String disenoText = item.tipoDiseno == TipoDiseno.estandar 
-        ? 'Diseño estándar' 
-        : 'Diseño personalizado';
-    
+    String disenoText =
+        item.tipoDiseno == TipoDiseno.estandar
+            ? 'Diseño estándar'
+            : 'Diseño personalizado';
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -353,27 +341,27 @@ class DetalleComponent extends GetView<VisualizacionController> {
               ),
               Text(
                 'Cantidad: ${item.cantidad}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Detalles del ítem
           Text('Laminado: ${item.nombreLaminado}'),
           Text('Tamaño: $tamanoText'),
           Text(disenoText),
-          
+
           const SizedBox(height: 8),
-          
+
           // Precios
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Precio unitario: ${formatoMoneda.format(item.precioUnitario)}'),
+              Text(
+                'Precio unitario: ${formatoMoneda.format(item.precioUnitario)}',
+              ),
               Text(
                 formatoMoneda.format(item.precioTotal),
                 style: const TextStyle(
@@ -387,75 +375,73 @@ class DetalleComponent extends GetView<VisualizacionController> {
       ),
     );
   }
-  
+
   // Mostrar selector de estado
   void _mostrarSelectorEstado(BuildContext context, VentaModel venta) {
     showCupertinoModalPopup(
       context: context,
-      builder: (context) => Container(
-        height: 300,
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: CupertinoColors.systemBackground,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+      builder:
+          (context) => Container(
+            height: 300,
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: CupertinoColors.systemBackground,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Cambiar Estado',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Lista de estados
+                Expanded(
+                  child: ListView(
+                    children: [
+                      _buildOpcionEstado(
+                        context,
+                        venta,
+                        EstadoVenta.cotizacion,
+                        'Cotización',
+                        CupertinoColors.systemBlue,
+                      ),
+                      _buildOpcionEstado(
+                        context,
+                        venta,
+                        EstadoVenta.pendiente,
+                        'Pendiente',
+                        CupertinoColors.systemOrange,
+                      ),
+                      _buildOpcionEstado(
+                        context,
+                        venta,
+                        EstadoVenta.completada,
+                        'Completada',
+                        CupertinoColors.systemGreen,
+                      ),
+                      _buildOpcionEstado(
+                        context,
+                        venta,
+                        EstadoVenta.cancelada,
+                        'Cancelada',
+                        CupertinoColors.systemRed,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Cambiar Estado',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Lista de estados
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildOpcionEstado(
-                    context,
-                    venta,
-                    EstadoVenta.cotizacion,
-                    'Cotización',
-                    CupertinoColors.systemBlue,
-                  ),
-                  _buildOpcionEstado(
-                    context,
-                    venta,
-                    EstadoVenta.pendiente,
-                    'Pendiente',
-                    CupertinoColors.systemOrange,
-                  ),
-                  _buildOpcionEstado(
-                    context,
-                    venta,
-                    EstadoVenta.completada,
-                    'Completada',
-                    CupertinoColors.systemGreen,
-                  ),
-                  _buildOpcionEstado(
-                    context,
-                    venta,
-                    EstadoVenta.cancelada,
-                    'Cancelada',
-                    CupertinoColors.systemRed,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
-  
+
   // Construir opción de estado
   Widget _buildOpcionEstado(
     BuildContext context,
@@ -475,10 +461,7 @@ class DetalleComponent extends GetView<VisualizacionController> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(
-              color: CupertinoColors.systemGrey5,
-              width: 0.5,
-            ),
+            bottom: BorderSide(color: CupertinoColors.systemGrey5, width: 0.5),
           ),
         ),
         child: Row(
@@ -486,10 +469,7 @@ class DetalleComponent extends GetView<VisualizacionController> {
             Container(
               width: 16,
               height: 16,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(width: 16),
             Text(texto),
@@ -504,7 +484,7 @@ class DetalleComponent extends GetView<VisualizacionController> {
       ),
     );
   }
-  
+
   // Obtener color según estado
   Color _getColorPorEstado(EstadoVenta estado) {
     switch (estado) {
@@ -520,7 +500,7 @@ class DetalleComponent extends GetView<VisualizacionController> {
         return CupertinoColors.systemGrey;
     }
   }
-  
+
   // Obtener texto según estado
   String _getTextoEstado(EstadoVenta estado) {
     switch (estado) {
@@ -536,7 +516,7 @@ class DetalleComponent extends GetView<VisualizacionController> {
         return 'Desconocido';
     }
   }
-  
+
   // Obtener texto según tipo de envío
   String _getTextoEnvio(TipoEnvio tipo) {
     switch (tipo) {

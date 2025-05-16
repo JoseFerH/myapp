@@ -22,51 +22,47 @@ class ListaItemsComponent extends GetView<CarritoController> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: CupertinoColors.systemGrey5),
       ),
-      child: Obx(() => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Encabezado
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Productos en Carrito',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+      child: Obx(
+        () => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Encabezado
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Productos en Carrito',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
-                Text(
-                  '${controller.items.length} ítem(s)',
-                  style: const TextStyle(
-                    color: CupertinoColors.systemGrey,
+                  Text(
+                    '${controller.items.length} ítem(s)',
+                    style: const TextStyle(color: CupertinoColors.systemGrey),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          
-          // Lista de ítems
-          ListView.separated(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: controller.items.length,
-            separatorBuilder: (context, index) => Container(
-              height: 1,
-              color: CupertinoColors.systemGrey5,
+
+            // Lista de ítems
+            ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: controller.items.length,
+              separatorBuilder:
+                  (context, index) =>
+                      Container(height: 1, color: CupertinoColors.systemGrey5),
+              itemBuilder: (context, index) {
+                final item = controller.items[index];
+                return _buildItemCard(item, index);
+              },
             ),
-            itemBuilder: (context, index) {
-              final item = controller.items[index];
-              return _buildItemCard(item, index);
-            },
-          ),
-        ],
-      )),
+          ],
+        ),
+      ),
     );
   }
-  
+
   // Construir tarjeta de ítem
   Widget _buildItemCard(ItemVentaModel item, int index) {
     // Mapear tamaño a texto legible
@@ -75,24 +71,19 @@ class ListaItemsComponent extends GetView<CarritoController> {
       case TamanoSticker.cuarto:
         tamanoText = '1/4 de hoja';
         break;
-      case TamanoSticker.medio:
-        tamanoText = '1/2 hoja';
-        break;
-      case TamanoSticker.tresQuartos:
-        tamanoText = '3/4 de hoja';
-        break;
       case TamanoSticker.completo:
         tamanoText = 'Hoja completa';
         break;
       default:
         tamanoText = 'Tamaño personalizado';
     }
-    
+
     // Descripción del diseño
-    String disenoText = item.tipoDiseno == TipoDiseno.estandar 
-        ? 'Diseño estándar' 
-        : 'Diseño personalizado';
-    
+    String disenoText =
+        item.tipoDiseno == TipoDiseno.estandar
+            ? 'Diseño estándar'
+            : 'Diseño personalizado';
+
     return Dismissible(
       key: Key(item.id.isEmpty ? 'item-$index' : item.id),
       direction: DismissDirection.endToStart,
@@ -100,10 +91,7 @@ class ListaItemsComponent extends GetView<CarritoController> {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         color: CupertinoColors.systemRed,
-        child: const Icon(
-          CupertinoIcons.delete,
-          color: CupertinoColors.white,
-        ),
+        child: const Icon(CupertinoIcons.delete, color: CupertinoColors.white),
       ),
       onDismissed: (direction) {
         controller.eliminarItem(index);
@@ -137,9 +125,9 @@ class ListaItemsComponent extends GetView<CarritoController> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             // Segunda fila - Detalles del ítem
             Row(
               children: [
@@ -155,9 +143,7 @@ class ListaItemsComponent extends GetView<CarritoController> {
                 ),
                 Text(
                   '${formatoMoneda.format(item.precioUnitario)} c/u',
-                  style: const TextStyle(
-                    color: CupertinoColors.systemGrey,
-                  ),
+                  style: const TextStyle(color: CupertinoColors.systemGrey),
                 ),
               ],
             ),

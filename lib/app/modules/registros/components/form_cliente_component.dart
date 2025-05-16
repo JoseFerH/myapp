@@ -18,12 +18,9 @@ class FormClienteComponent extends GetView<RegistrosController> {
       text: cliente?.direccion ?? '',
     );
     final zonaController = TextEditingController(text: cliente?.zona ?? '');
-    final tipoClienteController = TextEditingController(
-      text: cliente?.tipoCliente ?? 'Regular',
-    );
 
-    // Tipo de cliente seleccionado (estado local)
-    String tipoCliente = cliente?.tipoCliente ?? 'Regular';
+    // Inicializar tipo de cliente (ahora incluye "NUEVO")
+    String tipoCliente = cliente?.tipoCliente ?? 'NUEVO';
 
     return Column(
       children: [
@@ -89,31 +86,105 @@ class FormClienteComponent extends GetView<RegistrosController> {
                 const Text('Tipo de Cliente'),
                 const SizedBox(height: 8),
 
-                // Selector de tipo de cliente usando StatefulBuilder para manejar el estado local
+                // Selector de tipo de cliente (ahora incluye "NUEVO")
                 StatefulBuilder(
                   builder: (context, setState) {
                     return CupertinoSegmentedControl<String>(
                       children: const {
+                        'NUEVO': Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('NUEVO'),
+                        ),
                         'Regular': Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.symmetric(horizontal: 12),
                           child: Text('Regular'),
                         ),
                         'Frecuente': Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.symmetric(horizontal: 12),
                           child: Text('Frecuente'),
                         ),
                         'VIP': Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.symmetric(horizontal: 12),
                           child: Text('VIP'),
                         ),
                       },
                       groupValue: tipoCliente,
                       onValueChanged: (value) {
                         setState(() => tipoCliente = value);
-                        tipoClienteController.text = value;
                       },
                     );
                   },
+                ),
+
+                // Información sobre actualización automática
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemGrey6,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: CupertinoColors.systemGrey5),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Información de Actualización Automática:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'El tipo de cliente se actualiza automáticamente según estas reglas:',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        '• NUEVO: Cliente inicial',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      const Text(
+                        '• Regular: 3 o más compras',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      const Text(
+                        '• Frecuente: 18 o más compras',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                      const Text(
+                        '• VIP: 100 o más compras',
+                        style: TextStyle(fontSize: 13),
+                      ),
+
+                      if (cliente != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          'Compras realizadas: ${cliente!.comprasRealizadas}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        Text(
+                          cliente!.tipoCliente == 'VIP'
+                              ? '¡Este cliente ya ha alcanzado el nivel máximo!'
+                              : 'Faltan ${cliente!.proximoNivel()['faltantes']} compras para nivel ${cliente!.proximoNivel()['nivel']}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color:
+                                cliente!.tipoCliente == 'VIP'
+                                    ? CupertinoColors.activeGreen
+                                    : CupertinoColors.systemBlue,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 32),
@@ -192,6 +263,7 @@ class FormClienteComponent extends GetView<RegistrosController> {
         direccion: direccion,
         zona: zona,
         tipoCliente: tipoCliente,
+        comprasRealizadas: 0, // Nuevo cliente inicia con 0 compras
       );
 
       controller.crearCliente(nuevoCliente).then((success) {
@@ -205,12 +277,13 @@ class FormClienteComponent extends GetView<RegistrosController> {
         }
       });
     } else {
-      // Actualizar cliente existente
+      // Actualizar cliente existente - mantener contador de compras
       nuevoCliente = cliente!.copyWith(
         nombre: nombre,
         direccion: direccion,
         zona: zona,
         tipoCliente: tipoCliente,
+        // Mantener comprasRealizadas del cliente original
       );
 
       controller.actualizarCliente(nuevoCliente).then((success) {

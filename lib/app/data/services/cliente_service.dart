@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:flutter/cupertino.dart';
 import '../models/cliente_model.dart';
 import '../models/venta_model.dart';
 import '../providers/clientes_provider.dart';
@@ -192,5 +193,103 @@ class ClienteService extends GetxService {
       print(error.value);
       return [];
     }
+  }
+
+  // *** NUEVA FUNCIONALIDAD: ACTUALIZACIÓN AUTOMÁTICA DE TIPO DE CLIENTE ***
+
+  // Método para incrementar compras y actualizar estado del cliente
+  Future<bool> incrementarComprasCliente(
+    String clienteId,
+    double montoVenta,
+  ) async {
+    try {
+      error.value = '';
+
+      // Obtener cliente actual
+      ClienteModel? cliente;
+
+      try {
+        cliente = await _clientesProvider.obtenerClientePorId(clienteId);
+      } catch (e) {
+        error.value = 'Cliente no encontrado: $e';
+        return false;
+      }
+
+      if (cliente == null) {
+        error.value = 'Cliente no encontrado';
+        return false;
+      }
+
+      // Incrementar compras y total gastado
+      int nuevasCompras = cliente.comprasRealizadas + 1;
+      double nuevoTotal = cliente.totalGastado + montoVenta;
+
+      // Determinar si el tipo debe actualizarse automáticamente
+      String nuevoTipo = cliente.tipoCliente;
+      bool cambioTipo = false;
+
+      // Solo actualizar automáticamente si el tipo actual coincide con el calculado para las compras anteriores
+      String tipoEsperado = ClienteModel.determinarTipoCliente(
+        cliente.comprasRealizadas,
+      );
+      if (cliente.tipoCliente == tipoEsperado) {
+        String nuevoTipoCalculado = ClienteModel.determinarTipoCliente(
+          nuevasCompras,
+        );
+        if (nuevoTipoCalculado != tipoEsperado) {
+          nuevoTipo = nuevoTipoCalculado;
+          cambioTipo = true;
+        }
+      }
+
+      // Actualizar cliente con los nuevos valores
+      ClienteModel clienteActualizado = cliente.copyWith(
+        comprasRealizadas: nuevasCompras,
+        totalGastado: nuevoTotal,
+        tipoCliente: nuevoTipo,
+      );
+
+      // Actualizar en base de datos
+      await _clientesProvider.actualizarCliente(clienteActualizado);
+
+      // Actualizar en lista local
+      await cargarClientes();
+
+      // Si el cliente alcanzó el nivel VIP, mostrar notificación
+      if (cambioTipo && nuevoTipo == 'VIP') {
+        _mostrarNotificacionClienteVIP(cliente.nombre);
+      } else if (cambioTipo) {
+        _mostrarNotificacionCambioTipo(cliente.nombre, nuevoTipo);
+      }
+
+      return true;
+    } catch (e) {
+      error.value = 'Error al actualizar compras de cliente: $e';
+      print(error.value);
+      return false;
+    }
+  }
+
+  // Mostrar notificación cuando un cliente alcanza el nivel VIP
+  void _mostrarNotificacionClienteVIP(String nombreCliente) {
+    Get.snackbar(
+      '¡Cliente VIP!',
+      '$nombreCliente ha alcanzado el estado VIP tras 100 compras.',
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: CupertinoColors.activeGreen.withOpacity(0.9),
+      colorText: CupertinoColors.white,
+      duration: Duration(seconds: 5),
+      icon: Icon(CupertinoIcons.star_fill, color: CupertinoColors.white),
+    );
+  }
+
+  // Mostrar notificación para otros cambios de tipo
+  void _mostrarNotificacionCambioTipo(String nombreCliente, String nuevoTipo) {
+    Get.snackbar(
+      'Cliente Actualizado',
+      '$nombreCliente ahora es cliente $nuevoTipo',
+      snackPosition: SnackPosition.BOTTOM,
+      duration: Duration(seconds: 3),
+    );
   }
 }

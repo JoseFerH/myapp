@@ -200,12 +200,17 @@ class CalculadoraController extends GetxController {
       final itemVenta = _calculadoraService.crearItemVenta();
       _carritoService.agregarItem(itemVenta);
 
+      // AÑADIR ESTA PARTE: Transferir el cliente seleccionado al carrito
+      if (clienteSeleccionado.value != null) {
+        _carritoService.seleccionarCliente(clienteSeleccionado.value!);
+      }
+
       // Mostrar mensaje de éxito
-      Get.snackbar(
-        'Éxito',
-        'Producto agregado al carrito',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Get.snackbar(
+      //   'Éxito',
+      //   'Producto agregado al carrito',
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
 
       // Resetear para nueva calculación
       resetear();

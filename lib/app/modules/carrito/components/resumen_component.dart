@@ -4,10 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../controllers/carrito_controller.dart';
+import '../../../data/models/item_venta_model.dart';
 
 class ResumenComponent extends GetView<CarritoController> {
   ResumenComponent({Key? key}) : super(key: key);
-  
+
   // Formato para moneda guatemalteca
   final formatoMoneda = NumberFormat.currency(
     locale: 'es_GT',
@@ -29,42 +30,67 @@ class ResumenComponent extends GetView<CarritoController> {
         children: [
           const Text(
             'Resumen',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Subtotal
           _buildResumenRow(
             label: 'Subtotal:',
             valor: controller.subtotal.value,
           ),
-          
+          // Añadir después del subtotal pero antes del costo de envío
+          Obx(() {
+            // Contar stickers de 1/4
+            int cantidadStickers = 0;
+            for (var item in controller.items) {
+              if (item.tamano == TamanoSticker.cuarto) {
+                cantidadStickers += item.cantidad;
+              }
+            }
+
+            // Mostrar texto de descuento solo si hay más de un sticker de 1/4
+            if (cantidadStickers > 1) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: const [
+                    Text(
+                      'Descuento multicompra aplicado',
+                      style: TextStyle(
+                        color: CupertinoColors.activeGreen,
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          }),
           // Envío
-          _buildResumenRow(
-            label: 'Envío:',
-            valor: controller.costoEnvio.value,
-          ),
-          
+          _buildResumenRow(label: 'Envío:', valor: controller.costoEnvio.value),
+
           // Reemplazamos Divider por un contenedor personalizado
           Container(
             height: 1,
             color: CupertinoColors.systemGrey4,
             margin: const EdgeInsets.symmetric(vertical: 12),
           ),
-          
+
           // Total
           _buildResumenRow(
             label: 'TOTAL:',
             valor: controller.total.value,
             esTotal: true,
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Promoción de redes sociales si aplica
           Obx(() {
             if (controller.verificarPromoRedesSociales()) {
@@ -94,7 +120,7 @@ class ResumenComponent extends GetView<CarritoController> {
       ),
     );
   }
-  
+
   // Construir fila de resumen
   Widget _buildResumenRow({
     required String label,

@@ -28,14 +28,11 @@ class InputCantidadComponent extends GetView<CalculadoraController> {
         children: [
           const Text(
             'Cantidad',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           Row(
             children: [
               CupertinoButton(
@@ -47,20 +44,22 @@ class InputCantidadComponent extends GetView<CalculadoraController> {
                   }
                 },
               ),
-              
+
               Expanded(
                 child: Container(
                   alignment: Alignment.center,
-                  child: Obx(() => Text(
-                    '${controller.cantidad.value}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  child: Obx(
+                    () => Text(
+                      '${controller.cantidad.value}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  )),
+                  ),
                 ),
               ),
-              
+
               CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.plus_circle),

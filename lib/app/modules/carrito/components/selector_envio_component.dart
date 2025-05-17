@@ -16,6 +16,11 @@ class SelectorEnvioComponent extends GetView<CarritoController> {
 
   @override
   Widget build(BuildContext context) {
+    // Asegurarnos de que los precios estén actualizados al cargar el componente
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.actualizarPreciosEnvio();
+    });
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -28,43 +33,46 @@ class SelectorEnvioComponent extends GetView<CarritoController> {
         children: [
           const Text(
             'Tipo de Envío',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Opciones de envío
+          Obx(
+            () => CupertinoSegmentedControl<TipoEnvio>(
+              children: {
+                TipoEnvio.normal: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    "Normal\n${formatoMoneda.format(controller.costoEnvioNormal.value)}",
+                  ),
+                ),
+                TipoEnvio.express: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    "Express\n${formatoMoneda.format(controller.costoEnvioExpress.value)}",
+                  ),
+                ),
+                TipoEnvio.personalizado: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text("Personalizado"),
+                ),
+              },
+              groupValue: controller.tipoEnvio.value,
+              onValueChanged: (value) {
+                controller.seleccionarTipoEnvio(value);
+
+                // Si es personalizado, mostrar diálogo para ingresar precio
+                if (value == TipoEnvio.personalizado) {
+                  _mostrarDialogoPrecioEnvio(context);
+                }
+              },
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
-          // Opciones de envío
-          Obx(() => CupertinoSegmentedControl<TipoEnvio>(
-            children: {
-              TipoEnvio.normal: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text("Normal\n${formatoMoneda.format(controller.costoEnvioNormal.value)}"),
-              ),
-              TipoEnvio.express: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text("Express\n${formatoMoneda.format(controller.costoEnvioExpress.value)}"),
-              ),
-              TipoEnvio.personalizado: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text("Personalizado"),
-              ),
-            },
-            groupValue: controller.tipoEnvio.value,
-            onValueChanged: (value) {
-              controller.seleccionarTipoEnvio(value);
-              
-              // Si es personalizado, mostrar diálogo para ingresar precio
-              if (value == TipoEnvio.personalizado) {
-                _mostrarDialogoPrecioEnvio(context);
-              }
-            },
-          )),
-          
-          const SizedBox(height: 16),
-          
+
           // Mostrar información del envío seleccionado
           Obx(() {
             String descripcion;
@@ -76,12 +84,13 @@ class SelectorEnvioComponent extends GetView<CarritoController> {
                 descripcion = 'Entrega en 24 horas';
                 break;
               case TipoEnvio.personalizado:
-                descripcion = 'Envío personalizado: ${formatoMoneda.format(controller.costoEnvioPersonalizado.value)}';
+                descripcion =
+                    'Envío personalizado: ${formatoMoneda.format(controller.costoEnvioPersonalizado.value)}';
                 break;
               default:
                 descripcion = '';
             }
-            
+
             return Text(
               descripcion,
               style: const TextStyle(
@@ -90,61 +99,83 @@ class SelectorEnvioComponent extends GetView<CarritoController> {
               ),
             );
           }),
+
+          // Mostrar costo de envío actual (para depuración y confianza del usuario)
+          Obx(
+            () => Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                'Costo de envío actual: ${formatoMoneda.format(controller.costoEnvio.value)}',
+                style: const TextStyle(
+                  color: CupertinoColors.systemGrey,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
-  
+
   // Diálogo para ingresar precio de envío personalizado
   void _mostrarDialogoPrecioEnvio(BuildContext context) {
+    // Inicializar el controlador con el valor actual o un valor por defecto
     final TextEditingController precioController = TextEditingController(
-      text: controller.costoEnvioPersonalizado.value.toString(),
+      text:
+          controller.costoEnvioPersonalizado.value > 0
+              ? controller.costoEnvioPersonalizado.value.toString()
+              : '0.0',
     );
-    
+
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Precio de Envío Personalizado'),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: CupertinoTextField(
-            controller: precioController,
-            placeholder: 'Ingrese precio',
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            prefix: const Padding(
-              padding: EdgeInsets.only(left: 8.0),
-              child: Text('Q'),
+      builder:
+          (context) => CupertinoAlertDialog(
+            title: const Text('Precio de Envío Personalizado'),
+            content: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: CupertinoTextField(
+                controller: precioController,
+                placeholder: 'Ingrese precio',
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                prefix: const Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: Text('Q'),
+                ),
+              ),
             ),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('Cancelar'),
+                onPressed: () {
+                  // Volver a tipo normal si cancela
+                  controller.seleccionarTipoEnvio(TipoEnvio.normal);
+                  Navigator.pop(context);
+                },
+              ),
+              CupertinoDialogAction(
+                child: const Text('Aceptar'),
+                onPressed: () {
+                  // Validar y guardar precio
+                  if (precioController.text.isNotEmpty) {
+                    try {
+                      double precio = double.parse(precioController.text);
+                      controller.setCostoEnvioPersonalizado(precio);
+                      controller.seleccionarTipoEnvio(TipoEnvio.personalizado);
+                    } catch (e) {
+                      // Si hay error, establecer valor por defecto
+                      controller.setCostoEnvioPersonalizado(0.0);
+                    }
+                  }
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('Cancelar'),
-            onPressed: () {
-              // Volver a tipo normal si cancela
-              controller.seleccionarTipoEnvio(TipoEnvio.normal);
-              Navigator.pop(context);
-            },
-          ),
-          CupertinoDialogAction(
-            child: const Text('Aceptar'),
-            onPressed: () {
-              // Validar y guardar precio
-              if (precioController.text.isNotEmpty) {
-                try {
-                  double precio = double.parse(precioController.text);
-                  controller.setCostoEnvioPersonalizado(precio);
-                  controller.seleccionarTipoEnvio(TipoEnvio.personalizado);
-                } catch (e) {
-                  // Si hay error, establecer valor por defecto
-                  controller.setCostoEnvioPersonalizado(0.0);
-                }
-              }
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
     );
   }
 }

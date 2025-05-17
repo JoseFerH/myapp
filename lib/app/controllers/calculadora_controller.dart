@@ -83,31 +83,40 @@ class CalculadoraController extends GetxController {
   // Agregar una hoja a la selección
   void agregarHoja(HojaModel hoja) {
     _calculadoraService.agregarHoja(hoja);
+    _calculadoraService.calcularPrecio(); // Recalcular precio al agregar hoja
     update();
   }
 
   // Agregar un laminado a la selección
   void agregarLaminado(LaminadoModel laminado) {
     _calculadoraService.agregarLaminado(laminado);
+    _calculadoraService
+        .calcularPrecio(); // Recalcular precio al agregar laminado
     update();
   }
 
   // Quitar una hoja de la selección
   void quitarHoja(int index) {
     _calculadoraService.quitarHoja(index);
+    _calculadoraService.calcularPrecio(); // Recalcular precio al quitar hoja
     update();
   }
 
   // Quitar un laminado de la selección
   void quitarLaminado(int index) {
     _calculadoraService.quitarLaminado(index);
+    _calculadoraService
+        .calcularPrecio(); // Recalcular precio al quitar laminado
     update();
   }
 
   // Seleccionar tamaño
   void seleccionarTamano(TamanoSticker tamano) {
     _calculadoraService.tamanoSeleccionado.value = tamano;
-    _calculadoraService.calcularPrecio();
+    // Solo calcular precio si hay al menos un material seleccionado
+    if (hojasSeleccionadas.isNotEmpty || laminadosSeleccionados.isNotEmpty) {
+      _calculadoraService.calcularPrecio();
+    }
     update();
   }
 
@@ -117,8 +126,15 @@ class CalculadoraController extends GetxController {
     if (tipo == TipoDiseno.estandar) {
       _calculadoraService.precioDiseno.value =
           _calculadoraService.configuracion.precioDisenioEstandar;
+    } else {
+      // Si es personalizado, usar el precio personalizado configurado
+      _calculadoraService.precioDiseno.value =
+          _calculadoraService.configuracion.precioDisenioPersonalizado;
     }
-    _calculadoraService.calcularPrecio();
+    // Solo calcular precio si hay al menos un material seleccionado
+    if (hojasSeleccionadas.isNotEmpty || laminadosSeleccionados.isNotEmpty) {
+      _calculadoraService.calcularPrecio();
+    }
     update();
   }
 
@@ -206,11 +222,11 @@ class CalculadoraController extends GetxController {
       }
 
       // Mostrar mensaje de éxito
-      // Get.snackbar(
-      //   'Éxito',
-      //   'Producto agregado al carrito',
-      //   snackPosition: SnackPosition.BOTTOM,
-      // );
+      Get.snackbar(
+        'Éxito',
+        'Producto agregado al carrito',
+        snackPosition: SnackPosition.BOTTOM,
+      );
 
       // Resetear para nueva calculación
       resetear();

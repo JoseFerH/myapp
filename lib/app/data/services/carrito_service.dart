@@ -22,6 +22,10 @@ class CarritoService extends GetxService {
   final Rx<TipoEnvio> tipoEnvio = TipoEnvio.normal.obs;
   final RxDouble costoEnvioPersonalizado = 0.0.obs;
 
+  // Costos de envío configurados
+  final RxDouble costoEnvioNormal = 18.0.obs;
+  final RxDouble costoEnvioExpress = 30.0.obs;
+
   // Totales
   final RxDouble subtotal = 0.0.obs;
   final RxDouble costoEnvio = 0.0.obs;
@@ -42,6 +46,10 @@ class CarritoService extends GetxService {
       // Cargar configuración global
       configuracion = await _configuracionProvider.obtenerConfiguracion();
 
+      // Inicializar valores de costos de envío desde la configuración
+      costoEnvioNormal.value = configuracion.costoEnvioNormal;
+      costoEnvioExpress.value = configuracion.costoEnvioExpress;
+
       // Actualizar costo de envío por defecto
       costoEnvio.value = configuracion.costoEnvioNormal;
 
@@ -52,6 +60,29 @@ class CarritoService extends GetxService {
       return this;
     } finally {
       cargando.value = false;
+    }
+  }
+
+  // Método para actualizar la configuración cuando cambie
+  Future<void> actualizarConfiguracion() async {
+    try {
+      configuracion = await _configuracionProvider.obtenerConfiguracion();
+
+      // Actualizar los costos de envío
+      costoEnvioNormal.value = configuracion.costoEnvioNormal;
+      costoEnvioExpress.value = configuracion.costoEnvioExpress;
+
+      // Actualizar el costo de envío actual según el tipo seleccionado
+      if (tipoEnvio.value == TipoEnvio.normal) {
+        costoEnvio.value = costoEnvioNormal.value;
+      } else if (tipoEnvio.value == TipoEnvio.express) {
+        costoEnvio.value = costoEnvioExpress.value;
+      }
+
+      // Recalcular totales con los nuevos costos
+      recalcularTotales();
+    } catch (e) {
+      print('Error al actualizar configuración: $e');
     }
   }
 
@@ -75,6 +106,8 @@ class CarritoService extends GetxService {
     clienteSeleccionado.value = null;
     tipoEnvio.value = TipoEnvio.normal;
     costoEnvioPersonalizado.value = 0.0;
+    costoEnvio.value =
+        costoEnvioNormal.value; // Usar el valor normal por defecto
     notas.value = '';
     recalcularTotales();
   }
@@ -90,10 +123,10 @@ class CarritoService extends GetxService {
 
     switch (tipo) {
       case TipoEnvio.normal:
-        costoEnvio.value = configuracion.costoEnvioNormal;
+        costoEnvio.value = costoEnvioNormal.value;
         break;
       case TipoEnvio.express:
-        costoEnvio.value = configuracion.costoEnvioExpress;
+        costoEnvio.value = costoEnvioExpress.value;
         break;
       case TipoEnvio.personalizado:
         costoEnvio.value = costoEnvioPersonalizado.value;
@@ -153,25 +186,32 @@ class CarritoService extends GetxService {
     // Aplicar reglas especiales (como promoción de redes sociales)
     _aplicarReglasEspeciales();
 
+    // Asegurarse de que el costo de envío sea correcto según el tipo
+    switch (tipoEnvio.value) {
+      case TipoEnvio.normal:
+        costoEnvio.value = costoEnvioNormal.value;
+        break;
+      case TipoEnvio.express:
+        costoEnvio.value = costoEnvioExpress.value;
+        break;
+      case TipoEnvio.personalizado:
+        costoEnvio.value = costoEnvioPersonalizado.value;
+        break;
+    }
+
     // Calcular total
     total.value = subtotal.value + costoEnvio.value;
   }
 
   // Aplicar reglas especiales
   void _aplicarReglasEspeciales() {
-    // Regla: Redes Sociales, 3 por Q90 con envío incluido
-    // Esta regla se aplicaría según lógica de negocio específica
-    // Por ahora, solo dejamos el código comentado como ejemplo
-
-    /*
-    // Verificar si tenemos 3 stickers de tamaño cuarto
-    if (items.length == 3 && 
-        items.every((item) => item.tamano == TamanoSticker.cuarto && item.cantidad == 1)) {
-      // Aplicar precio fijo con envío incluido
+    // Verificar si es promoción redes sociales
+    if (esPromoRedesSociales()) {
+      // Subtotal es precio fijo de configuracion
       subtotal.value = configuracion.precioRedesSociales;
-      costoEnvio.value = 0.0; // Ya incluido
+      // Envío ya incluido
+      costoEnvio.value = 0.0;
     }
-    */
   }
 
   // Crear cotización

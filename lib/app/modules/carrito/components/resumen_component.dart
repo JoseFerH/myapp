@@ -36,10 +36,13 @@ class ResumenComponent extends GetView<CarritoController> {
           const SizedBox(height: 16),
 
           // Subtotal
-          _buildResumenRow(
-            label: 'Subtotal:',
-            valor: controller.subtotal.value,
+          Obx(
+            () => _buildResumenRow(
+              label: 'Subtotal:',
+              valor: controller.subtotal.value,
+            ),
           ),
+
           // Añadir después del subtotal pero antes del costo de envío
           Obx(() {
             // Contar stickers de 1/4
@@ -72,8 +75,14 @@ class ResumenComponent extends GetView<CarritoController> {
               return const SizedBox.shrink();
             }
           }),
-          // Envío
-          _buildResumenRow(label: 'Envío:', valor: controller.costoEnvio.value),
+
+          // Envío con valor reactivo
+          Obx(
+            () => _buildResumenRow(
+              label: 'Envío:',
+              valor: controller.costoEnvio.value,
+            ),
+          ),
 
           // Reemplazamos Divider por un contenedor personalizado
           Container(
@@ -82,11 +91,13 @@ class ResumenComponent extends GetView<CarritoController> {
             margin: const EdgeInsets.symmetric(vertical: 12),
           ),
 
-          // Total
-          _buildResumenRow(
-            label: 'TOTAL:',
-            valor: controller.total.value,
-            esTotal: true,
+          // Total con valor reactivo
+          Obx(
+            () => _buildResumenRow(
+              label: 'TOTAL:',
+              valor: controller.total.value,
+              esTotal: true,
+            ),
           ),
 
           const SizedBox(height: 8),

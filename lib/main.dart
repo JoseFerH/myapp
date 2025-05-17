@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart'; // Importar para SystemChrome
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io' show Platform;
 import 'firebase_options.dart';
 import 'app/routes/app_pages.dart';
 import 'app/data/providers/db_provider.dart';
@@ -16,6 +18,9 @@ import 'app/data/services/estadisticas_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Configurar orientación según el tipo de dispositivo
+  _setOrientationConstraints();
 
   // Inicializar Firebase with error handling
   try {
@@ -75,4 +80,34 @@ void main() async {
       ),
     ),
   );
+}
+
+// Función para determinar la orientación según el tipo de dispositivo
+void _setOrientationConstraints() {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Obtener información del tamaño de la pantalla
+    final mediaQuery = MediaQueryData.fromView(WidgetsBinding.instance.window);
+    final screenSize = mediaQuery.size;
+    final shortestSide = screenSize.shortestSide;
+
+    // Considerar como tablet si el lado más corto es mayor a 600dp
+    // Esta es una métrica comúnmente usada para determinar si es tablet
+    final isTablet = shortestSide >= 600;
+
+    if (isTablet) {
+      // Para tablets: permitir todas las orientaciones
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      // Para teléfonos: bloquear solo en modo vertical (portrait)
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    }
+  });
 }

@@ -4,6 +4,7 @@ import '../data/models/costo_fijo_model.dart';
 import '../data/providers/configuracion_provider.dart';
 import '../data/models/proyecto_model.dart';
 import '../data/providers/proyectos_provider.dart';
+import '../data/services/carrito_service.dart';
 
 class ConfiguracionController extends GetxController {
   // Provider
@@ -175,6 +176,16 @@ class ConfiguracionController extends GetxController {
 
       await _configProvider.actualizarConfiguracion(configActualizada);
       configuracion.value = configActualizada;
+
+      // Actualizar los valores en el servicio de carrito para reflejar los cambios
+      try {
+        if (Get.isRegistered<CarritoService>()) {
+          final carritoService = Get.find<CarritoService>();
+          await carritoService.actualizarConfiguracion();
+        }
+      } catch (e) {
+        print("Error al actualizar CarritoService: $e");
+      }
 
       Get.snackbar(
         'Éxito',

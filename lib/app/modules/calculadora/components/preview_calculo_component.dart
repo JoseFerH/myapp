@@ -22,129 +22,177 @@ class PreviewCalculoComponent extends GetView<CalculadoraController> {
     // Acceder al servicio calculadora para obtener la configuración
     final calculadoraService = Get.find<CalculadoraService>();
 
-    return GetBuilder<CalculadoraController>(
-      builder:
-          (controller) => Container(
-            margin: EdgeInsets.zero,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemGrey6,
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: CupertinoColors.systemGrey5),
-              boxShadow: [
-                BoxShadow(
-                  color: CupertinoColors.systemGrey.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 3,
-                  offset: const Offset(0, 1),
-                ),
-              ],
+    return Container(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGrey6,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: CupertinoColors.systemGrey5),
+        boxShadow: [
+          BoxShadow(
+            color: CupertinoColors.systemGrey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Resumen de Cálculo',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Desglose de costos de materiales
+          Obx(
+            () => _buildResumenItem(
+              'Materiales:',
+              controller.costoMateriales.value,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Resumen de Cálculo',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+          ),
 
-                const SizedBox(height: 16),
-
-                // Desglose de costos de materiales
-                Obx(
-                  () => _buildResumenItem(
-                    'Materiales:',
-                    controller.costoMateriales.value,
-                  ),
-                ),
-
-                // Detalle de cada material - Ahora para múltiples hojas
-                Obx(() {
-                  List<Widget> hojasWidgets = [];
-                  for (var hoja in controller.hojasSeleccionadas) {
-                    hojasWidgets.add(
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20.0),
-                        child: _buildDetalleItem(
-                          'Hoja ${hoja.nombre}:',
-                          _calcularCostoMaterialSegunTamano(
-                            hoja.precioUnitario,
-                            controller.tamanoSeleccionado.value,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  return Column(children: hojasWidgets);
-                }),
-
-                // Detalle de cada material - Ahora para múltiples laminados
-                Obx(() {
-                  List<Widget> laminadosWidgets = [];
-                  for (var laminado in controller.laminadosSeleccionados) {
-                    laminadosWidgets.add(
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20.0),
-                        child: _buildDetalleItem(
-                          'Laminado ${laminado.nombre}:',
-                          _calcularCostoMaterialSegunTamano(
-                            laminado.precioUnitario,
-                            controller.tamanoSeleccionado.value,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  return Column(children: laminadosWidgets);
-                }),
-
+          // Detalle de cada material - Ahora para múltiples hojas
+          Obx(() {
+            List<Widget> hojasWidgets = [];
+            for (var hoja in controller.hojasSeleccionadas) {
+              hojasWidgets.add(
                 Padding(
                   padding: const EdgeInsets.only(left: 20.0),
                   child: _buildDetalleItem(
-                    'Tinta:',
-                    controller.calcularCostoTinta(),
+                    'Hoja ${hoja.nombre}:',
+                    _calcularCostoMaterialSegunTamano(
+                      hoja.precioUnitario,
+                      controller.tamanoSeleccionado.value,
+                    ),
                   ),
                 ),
+              );
+            }
+            return Column(children: hojasWidgets);
+          }),
 
-                _buildDivider(),
-
-                // Resto del componente sigue igual
-                // ...
-
-                // Desglose de costos fijos
-                Obx(
-                  () => _buildResumenItem(
-                    'Costos Fijos:',
-                    controller.costosFijos.value,
+          // Detalle de cada material - Ahora para múltiples laminados
+          Obx(() {
+            List<Widget> laminadosWidgets = [];
+            for (var laminado in controller.laminadosSeleccionados) {
+              laminadosWidgets.add(
+                Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: _buildDetalleItem(
+                    'Laminado ${laminado.nombre}:',
+                    _calcularCostoMaterialSegunTamano(
+                      laminado.precioUnitario,
+                      controller.tamanoSeleccionado.value,
+                    ),
                   ),
                 ),
+              );
+            }
+            return Column(children: laminadosWidgets);
+          }),
 
-                // Detalle de cada costo fijo activo
-                Obx(() {
-                  List<Widget> costosFijosWidgets = [];
-                  for (var costo in calculadoraService.listaCostosFijos) {
-                    if (costo.activo) {
-                      costosFijosWidgets.add(
-                        Padding(
-                          padding: const EdgeInsets.only(left: 20.0),
-                          child: _buildDetalleItem(
-                            '${costo.nombre}:',
-                            costo.valor,
-                          ),
-                        ),
-                      );
-                    }
-                  }
-                  return Column(children: costosFijosWidgets);
-                }),
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0),
+            child: _buildDetalleItem('Tinta:', controller.calcularCostoTinta()),
+          ),
 
-                _buildDivider(),
+          _buildDivider(),
 
-                // Resto del código sigue igual
-                // ...
-              ],
+          // Desglose de costos fijos
+          Obx(
+            () => _buildResumenItem(
+              'Costos Fijos:',
+              controller.costosFijos.value,
             ),
           ),
+
+          // Detalle de cada costo fijo activo
+          Obx(() {
+            List<Widget> costosFijosWidgets = [];
+            for (var costo in calculadoraService.listaCostosFijos) {
+              if (costo.activo) {
+                costosFijosWidgets.add(
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20.0),
+                    child: _buildDetalleItem('${costo.nombre}:', costo.valor),
+                  ),
+                );
+              }
+            }
+            return Column(children: costosFijosWidgets);
+          }),
+
+          _buildDivider(),
+
+          // Información de diseño
+          Obx(
+            () => _buildResumenItem(
+              'Diseño (${controller.tipoDiseno.value == TipoDiseno.estandar ? "Estándar" : "Personalizado"}):',
+              controller.precioDiseno.value,
+            ),
+          ),
+
+          // Información de desperdicio (si está aplicado)
+          Obx(() {
+            if (controller.aplicarDesperdicio.value) {
+              return _buildResumenItem(
+                'Desperdicio (${calculadoraService.configuracion.porcentajeDesperdicio.toStringAsFixed(1)}%):',
+                (controller.costoMateriales.value +
+                        controller.costosFijos.value) *
+                    (calculadoraService.configuracion.porcentajeDesperdicio /
+                        100),
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          }),
+
+          _buildDivider(),
+
+          // Subtotal
+          Obx(
+            () => _buildResumenItem(
+              'Subtotal:',
+              controller.subtotal.value,
+              isBold: true,
+            ),
+          ),
+
+          // Ganancia
+          Obx(
+            () => _buildResumenItem(
+              'Ganancia (${calculadoraService.configuracion.porcentajeGananciasDefault.toStringAsFixed(0)}%):',
+              controller.ganancia.value,
+            ),
+          ),
+
+          _buildDivider(),
+
+          // Precio unitario
+          Obx(
+            () => _buildResumenItem(
+              'Precio unitario:',
+              controller.precioUnitario.value,
+              isBold: true,
+            ),
+          ),
+
+          // Precio total
+          Obx(
+            () => _buildResumenItem(
+              'Precio total (${controller.cantidad.value} unidades):',
+              controller.precioTotal.value,
+              isBold: true,
+              isTotal: true,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -220,7 +268,7 @@ class PreviewCalculoComponent extends GetView<CalculadoraController> {
       case TamanoSticker.completo:
         return precioBase;
       default:
-        return precioBase / 4; // Por defecto, usar 1/4
+        return precioBase / 4;
     }
   }
 }

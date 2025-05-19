@@ -99,13 +99,24 @@ class ConfiguracionView extends GetView<ConfiguracionController> {
                   onPressed:
                       controller.cargando.value
                           ? null
-                          : controller.guardarConfiguracion,
+                          : () {
+                            // Primero guardar la configuración
+                            controller.guardarConfiguracion().then((_) {
+                              // Después de guardar, salir de la pantalla
+                              Get.back();
+                            });
+                          },
                   child:
                       controller.cargando.value
                           ? const CupertinoActivityIndicator(
                             color: CupertinoColors.white,
                           )
-                          : const Text('Guardar Configuración'),
+                          : const Text(
+                            'Guardar Configuración',
+                            style: TextStyle(
+                              color: CupertinoColors.white,
+                            ), // Añadiendo color al texto
+                          ),
                 ),
               ),
             ],

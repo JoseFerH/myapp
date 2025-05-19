@@ -505,7 +505,10 @@ class _FormMaterialComponentState extends State<FormMaterialComponent> {
                   child: CupertinoButton(
                     padding: const EdgeInsets.all(12),
                     color: CupertinoColors.systemRed,
-                    child: const Text('Eliminar'),
+                    child: const Text(
+                      'Eliminar',
+                      style: TextStyle(color: CupertinoColors.white),
+                    ),
                     onPressed: () => _confirmarEliminar(context),
                   ),
                 ),
@@ -518,7 +521,10 @@ class _FormMaterialComponentState extends State<FormMaterialComponent> {
                 child: CupertinoButton(
                   padding: const EdgeInsets.all(12),
                   color: CupertinoColors.activeBlue,
-                  child: Text(widget.material == null ? 'Crear' : 'Actualizar'),
+                  child: Text(
+                    widget.material == null ? 'Crear' : 'Actualizar',
+                    style: TextStyle(color: CupertinoColors.white),
+                  ),
                   onPressed: () => _guardarMaterial(context),
                 ),
               ),
@@ -586,7 +592,10 @@ class _FormMaterialComponentState extends State<FormMaterialComponent> {
                 // Botón para cerrar
                 Center(
                   child: CupertinoButton(
-                    child: const Text('Cancelar'),
+                    child: const Text(
+                      'Cancelar',
+                      style: TextStyle(color: CupertinoColors.white),
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -639,11 +648,17 @@ class _FormMaterialComponentState extends State<FormMaterialComponent> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     CupertinoButton(
-                      child: const Text('Cancelar'),
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(color: CupertinoColors.white),
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     CupertinoButton(
-                      child: const Text('Aceptar'),
+                      child: const Text(
+                        'Aceptar',
+                        style: TextStyle(color: CupertinoColors.white),
+                      ),
                       onPressed: () {
                         setState(() {
                           fechaController.text = DateFormat(

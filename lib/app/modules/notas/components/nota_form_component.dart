@@ -1,6 +1,7 @@
 // lib/app/modules/notas/components/nota_form_component.dart
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../controllers/notas_controller.dart';
 import '../../../data/models/nota_model.dart';
@@ -166,7 +167,12 @@ class _NotaFormComponentState extends State<NotaFormComponent> {
                 child: CupertinoButton(
                   padding: const EdgeInsets.all(12),
                   color: CupertinoColors.activeBlue,
-                  child: Text(widget.nota == null ? 'Crear' : 'Actualizar'),
+                  child: Text(
+                    widget.nota == null ? 'Crear' : 'Actualizar',
+                    style: const TextStyle(
+                      color: CupertinoColors.white,
+                    ), // Aquí defines el color del texto
+                  ),
                   onPressed: () => _guardarNota(context),
                 ),
               ),

@@ -204,7 +204,10 @@ class FormClienteComponent extends GetView<RegistrosController> {
                   child: CupertinoButton(
                     padding: const EdgeInsets.all(12),
                     color: CupertinoColors.systemRed,
-                    child: const Text('Eliminar'),
+                    child: const Text(
+                      'Eliminar',
+                      style: TextStyle(color: CupertinoColors.white),
+                    ),
                     onPressed: () => _confirmarEliminar(context),
                   ),
                 ),
@@ -217,7 +220,10 @@ class FormClienteComponent extends GetView<RegistrosController> {
                 child: CupertinoButton(
                   padding: const EdgeInsets.all(12),
                   color: CupertinoColors.activeBlue,
-                  child: Text(cliente == null ? 'Crear' : 'Actualizar'),
+                  child: Text(
+                    cliente == null ? 'Crear' : 'Actualizar',
+                    style: TextStyle(color: CupertinoColors.white),
+                  ),
                   onPressed:
                       () => _guardarCliente(
                         context,

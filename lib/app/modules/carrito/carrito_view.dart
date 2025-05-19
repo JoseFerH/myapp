@@ -26,7 +26,7 @@ class CarritoView extends GetView<CarritoController> {
           if (controller.cargando.value) {
             return const LoadingIndicator(message: 'Cargando carrito...');
           }
-          
+
           // Mostrar error si existe
           if (controller.error.value.isNotEmpty) {
             return ErrorMessage(
@@ -34,7 +34,7 @@ class CarritoView extends GetView<CarritoController> {
               onRetry: () => controller.onInit(),
             );
           }
-          
+
           // Mostrar estado vacío si no hay items
           if (controller.items.isEmpty) {
             return EmptyState(
@@ -42,10 +42,13 @@ class CarritoView extends GetView<CarritoController> {
               message: 'Agrega productos desde la calculadora',
               icon: CupertinoIcons.cart,
               buttonText: 'Ir a Calculadora',
-              onButtonPressed: () => Get.find<HomeController>().changeIndex(2), // Ir a calculadora
+              onButtonPressed:
+                  () => Get.find<HomeController>().changeIndex(
+                    2,
+                  ), // Ir a calculadora
             );
           }
-          
+
           // Vista principal del carrito
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -54,19 +57,19 @@ class CarritoView extends GetView<CarritoController> {
               children: [
                 // Lista de items en el carrito
                 ListaItemsComponent(),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Selector de cliente
                 SelectorClienteComponent(),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Selector de tipo de envío
                 SelectorEnvioComponent(),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Campo para notas
                 CupertinoTextField(
                   placeholder: 'Notas adicionales...',
@@ -74,14 +77,14 @@ class CarritoView extends GetView<CarritoController> {
                   maxLines: 3,
                   onChanged: controller.setNotas,
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Resumen de la venta
                 ResumenComponent(),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Botones de acción
                 Row(
                   children: [
@@ -97,23 +100,24 @@ class CarritoView extends GetView<CarritoController> {
                         onPressed: controller.limpiarCarrito,
                       ),
                     ),
-                    
+
                     const SizedBox(width: 10),
-                    
+
                     // Botón de Generar Cotización
-                    Expanded(
-                      child: BotonCotizacionComponent(),
-                    ),
+                    Expanded(child: BotonCotizacionComponent()),
                   ],
                 ),
-                
+
                 const SizedBox(height: 10),
-                
+
                 // Botón de Crear Venta Directa
                 CupertinoButton(
                   padding: const EdgeInsets.all(12),
                   color: CupertinoColors.activeGreen,
-                  child: const Text('Crear Venta Directa'),
+                  child: const Text(
+                    'Crear Venta Directa',
+                    style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1)),
+                  ),
                   onPressed: controller.crearVenta,
                 ),
               ],

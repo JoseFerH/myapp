@@ -263,7 +263,10 @@ class _FormProveedorComponentState extends State<FormProveedorComponent> {
                   child: CupertinoButton(
                     padding: const EdgeInsets.all(12),
                     color: CupertinoColors.systemRed,
-                    child: const Text('Eliminar'),
+                    child: const Text(
+                      'Eliminar',
+                      style: TextStyle(color: CupertinoColors.white),
+                    ),
                     onPressed: () => _confirmarEliminar(context),
                   ),
                 ),
@@ -278,6 +281,7 @@ class _FormProveedorComponentState extends State<FormProveedorComponent> {
                   color: CupertinoColors.activeBlue,
                   child: Text(
                     widget.proveedor == null ? 'Crear' : 'Actualizar',
+                    style: TextStyle(color: CupertinoColors.white),
                   ),
                   onPressed: () => _guardarProveedor(context),
                 ),

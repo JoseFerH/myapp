@@ -254,9 +254,17 @@ class DetalleComponent extends GetView<VisualizacionController> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
-                              Icon(CupertinoIcons.doc_text),
+                              Icon(
+                                CupertinoIcons.doc_text,
+                                color: CupertinoColors.white, // Color del icono
+                              ),
                               SizedBox(width: 8),
-                              Text('Generar PDF'),
+                              Text(
+                                'Generar PDF',
+                                style: TextStyle(
+                                  color: CupertinoColors.white,
+                                ), // Color del texto
+                              ),
                             ],
                           ),
                           onPressed: controller.generarPDFVenta,
@@ -273,9 +281,17 @@ class DetalleComponent extends GetView<VisualizacionController> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
-                              Icon(CupertinoIcons.arrow_right_circle),
+                              Icon(
+                                CupertinoIcons.arrow_right_circle,
+                                color: CupertinoColors.white, // Color del icono
+                              ),
                               SizedBox(width: 8),
-                              Text('Cambiar Estado'),
+                              Text(
+                                'Cambiar Estado',
+                                style: TextStyle(
+                                  color: CupertinoColors.white,
+                                ), // Color del texto
+                              ),
                             ],
                           ),
                           onPressed:

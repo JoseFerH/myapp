@@ -48,9 +48,9 @@ class ClientesView extends GetView<RegistrosController> {
               0,
             ), // Reducir padding para que el botón sea más compacto
             color: CupertinoColors.activeBlue,
-            borderRadius: BorderRadius.circular(
-              30,
-            ), // Hacer el botón más circular
+            // borderRadius: BorderRadius.circular(
+            //   30,
+            // ), // Hacer el botón más circular
             // Aquí está el cambio - usar directamente el método que ya existe
             onPressed: () => _mostrarFormularioCliente(context),
             child: const SizedBox(
